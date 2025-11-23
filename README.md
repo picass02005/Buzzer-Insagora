@@ -11,6 +11,10 @@ Club Robot: <[club.robot@amicale-insat.fr](mailto:club.robot@amicale-insat.fr)>
 
 Main developper: Clément Duran <[clementduran0@gmail.com](mailto:clementduran0@gmail.com)>
 
+# Manual
+
+> [!TOOD]
+
 # Technical specifications
 
 ## Hardware
@@ -43,9 +47,5 @@ flowchart LR
 > [!TOOD]
 
 ### Frontend
-
-> [!TOOD]
-
-# Manual
 
 > [!TOOD]
