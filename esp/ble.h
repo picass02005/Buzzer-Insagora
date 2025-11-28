@@ -1,5 +1,5 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef BLE_H
+#define BLE_H
 
 extern bool is_master;
 
