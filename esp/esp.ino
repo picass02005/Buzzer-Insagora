@@ -1,13 +1,11 @@
 #include "ble.h"
 #include "esp-now.h"
-
-#define BUTTON 32     // Button is normally closed
-#define ONBOARD_LED 2 // Onboard led
+#include "pins.h"
 
 void setup()
 {
   // DEBUG
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Set pin mode
   pinMode(BUTTON, INPUT_PULLUP);

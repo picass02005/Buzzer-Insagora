@@ -30,7 +30,7 @@ upload_esp: compile_esp
 	@echo "Successfully uploaded $(SKETCH) to $(BOARD_PORT)"
 
 monitor_esp:
-	arduino-cli monitor -p $(DEBUG_PORT) -c 115200
+	arduino-cli monitor -p $(DEBUG_PORT) -c baudrate=9600 --timestamp
 
 print:
 	@echo "Detected ESP32: $(BOARD_PORT)"

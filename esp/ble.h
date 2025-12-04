@@ -4,5 +4,6 @@
 extern bool is_master;
 
 void activate_ble();
+void advertise_ble();
 
 #endif
