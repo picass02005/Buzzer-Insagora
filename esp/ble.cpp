@@ -58,6 +58,13 @@ public:
         String value = pCharacteristic->getValue().c_str();
         Serial.printf("[BLE] WRITE FROM %s: %s\n", connInfo.getAddress().toString().c_str(), value);
 
+        ESPNowMessage msg;
+        msg.fwd_ble = 0;
+        strncpy(msg.command, "TEST", sizeof(msg.command)-1);
+        msg.command[14] = '\0';
+        value.toCharArray(msg.params, sizeof(msg.params));
+        esp_now_send_message(msg);
+
         // Ack: send back same value
         pCharacteristic->setValue(value);
         pCharacteristic->notify();
