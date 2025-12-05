@@ -9,7 +9,7 @@ typedef struct
 {
     char fwd_ble;
     char command[15];
-    char params[231];
+    char data[231];
 } ESPNowMessage;
 
 void activate_esp_now();

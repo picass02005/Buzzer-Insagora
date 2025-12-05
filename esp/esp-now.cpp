@@ -19,11 +19,11 @@ for (int i = 0; i < 6; i++) {
 }
 
     Serial.printf(
-        "[ESP-NOW] RECV:\n\t%s\n\tSRC: %s\n\tFWD BLE: %d\n\tParams: %s\n",
+        "[ESP-NOW] RECV:\n\t%s\n\tSRC: %s\n\tFWD BLE: %d\n\tData: %s\n",
         msgIncoming.command,
         srcMacStr,
         msgIncoming.fwd_ble,
-        msgIncoming.params
+        msgIncoming.data
     );
 }
 
@@ -68,9 +68,9 @@ void esp_now_send_message(ESPNowMessage message)
 {
     esp_now_send(broadcastAddress, (uint8_t *)&message, sizeof(message));
     Serial.printf(
-        "[ESP-NOW] SEND:\n\tCMD: %s\n\tFWD BLE: %d\n\tParams: %s\n",
+        "[ESP-NOW] SEND:\n\tCMD: %s\n\tFWD BLE: %d\n\tData: %s\n",
         message.command,
         message.fwd_ble,
-        message.params
+        message.data
     );
 }

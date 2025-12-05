@@ -62,7 +62,7 @@ public:
         msg.fwd_ble = 0;
         strncpy(msg.command, "TEST", sizeof(msg.command)-1);
         msg.command[14] = '\0';
-        value.toCharArray(msg.params, sizeof(msg.params));
+        value.toCharArray(msg.data, sizeof(msg.data));
         esp_now_send_message(msg);
 
         // Ack: send back same value
