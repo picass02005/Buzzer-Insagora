@@ -8,9 +8,11 @@
 typedef struct
 {
     char fwd_ble;
-    char command[15];
-    char data[231];
+    char target[6];
+    char data[240];
 } ESPNowMessage;
+
+static uint8_t macAddress[6];
 
 void activate_esp_now();
 void esp_now_send_message(ESPNowMessage message);

@@ -12,7 +12,6 @@ def notification_handler(sender, data):
 
 
 async def main():
-
     print("BLE scanning")
     devices = await BleakScanner.discover(timeout=5.0)
     
@@ -42,7 +41,7 @@ async def main():
         while True:
             msg = await asyncio.to_thread(input, "")
             print(f"SEND: {msg}")
-            await client.write_gatt_char(CHAR_UUID, msg.encode(), response=False)
+            await client.write_gatt_char(CHAR_UUID, b"\x6C\xC8\x40\x06\xE7\x3C" + msg.encode(), response=False)
 
 
 if __name__ == "__main__":

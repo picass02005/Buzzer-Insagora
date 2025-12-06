@@ -20,6 +20,8 @@ void setup()
     delay(50);
   }
 
+  activate_esp_now();
+
   // Set master if button pressed
   if (digitalRead(BUTTON))
   {
@@ -35,8 +37,6 @@ void setup()
 
     activate_ble();
   }
-
-  activate_esp_now();
 }
 
 void loop()

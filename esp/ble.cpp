@@ -1,4 +1,5 @@
 #include <NimBLEDevice.h>
+#include <WiFi.h>
 #include "esp-now.h"
 #include "ble.h"
 #include "pins.h"
@@ -9,17 +10,20 @@
 
 bool is_master;
 
-NimBLEServer* pServer;
-NimBLEService* pService;
+NimBLEServer *pServer;
+NimBLEService *pService;
 
 // ---------------- Server callbacks ----------------
-class BLEBuzzerServerCallbacks : public NimBLEServerCallbacks {
+class BLEBuzzerServerCallbacks : public NimBLEServerCallbacks
+{
 public:
-    void onConnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo) {
+    void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
+    {
         Serial.printf("[BLE] Client connected: %s\n", connInfo.getAddress().toString().c_str());
 
         // Indicate successfull connection
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++)
+        {
             digitalWrite(ONBOARD_LED, HIGH);
             delay(100);
             digitalWrite(ONBOARD_LED, LOW);
@@ -27,56 +31,91 @@ public:
         }
     }
 
-    void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) {
+    void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
+    {
         Serial.printf("[BLE] Client disconnected: %s (Reason: %x)\n", connInfo.getAddress().toString().c_str(), reason);
         advertise_ble();
     }
 
-    void onMTUChange(uint16_t mtu, NimBLEConnInfo& connInfo) {
+    void onMTUChange(uint16_t mtu, NimBLEConnInfo &connInfo)
+    {
         Serial.printf("[BLE] MTU changed: %u\n", mtu);
     }
 
     uint32_t onPassKeyDisplay() {}
 
-    void onConfirmPassKey(NimBLEConnInfo& connInfo, uint32_t pin) {}
+    void onConfirmPassKey(NimBLEConnInfo &connInfo, uint32_t pin) {}
 
-    void onAuthenticationComplete(NimBLEConnInfo& connInfo) {}
+    void onAuthenticationComplete(NimBLEConnInfo &connInfo) {}
 
-    void onIdentity(NimBLEConnInfo& connInfo) {}
+    void onIdentity(NimBLEConnInfo &connInfo) {}
 
-    void onConnParamsUpdate(NimBLEConnInfo& connInfo) {}
+    void onConnParamsUpdate(NimBLEConnInfo &connInfo) {}
 
-    void onPhyUpdate(NimBLEConnInfo& connInfo, uint8_t txPhy, uint8_t rxPhy) {}
+    void onPhyUpdate(NimBLEConnInfo &connInfo, uint8_t txPhy, uint8_t rxPhy) {}
 };
 
 // ---------------- Characteristic callbacks ----------------
-class BLEBuzzerCallback : public NimBLECharacteristicCallbacks {
+class BLEBuzzerCallback : public NimBLECharacteristicCallbacks
+{
 public:
-    void onRead(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {}
+    void onRead(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo) {}
 
-    void onWrite(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo) {
+    void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
+    {
         String value = pCharacteristic->getValue().c_str();
         Serial.printf("[BLE] WRITE FROM %s: %s\n", connInfo.getAddress().toString().c_str(), value);
 
         ESPNowMessage msg;
-        msg.fwd_ble = 0;
-        strncpy(msg.command, "TEST", sizeof(msg.command)-1);
-        msg.command[14] = '\0';
-        value.toCharArray(msg.data, sizeof(msg.data));
-        esp_now_send_message(msg);
 
-        // Ack: send back same value
-        pCharacteristic->setValue(value);
-        pCharacteristic->notify();
+        int spaceIndex = value.indexOf(' ');
+
+        String target;
+        String data;
+
+        if (spaceIndex == -1)
+        {
+            // no space in value
+            target = value;
+            data = "";
+        }
+        else
+        {
+            target = value.substring(0, spaceIndex);
+            data = value.substring(spaceIndex + 1);
+        }
+
+        msg.fwd_ble = 0;
+
+        strncpy(msg.target, target.c_str(), sizeof(msg.data) - 1);
+
+        strncpy(msg.data, data.c_str(), sizeof(msg.data) - 1);
+        msg.data[sizeof(msg.data) - 1] = '\0';
+        
+        if (memcmp(msg.target, macAddress, 6) == 0)
+        {
+            Serial.println("TODO: COMMAND HANDLER BLE");
+        }
+        else
+        {
+            esp_now_send_message(msg);
+        }
+
+        // Ack: send back ACK
+        // pCharacteristic->setValue("ACK");
+        // pCharacteristic->notify();
     }
 
-    void onStatus(NimBLECharacteristic* pCharacteristic, int code) {}
+    void onStatus(NimBLECharacteristic *pCharacteristic, int code) {}
 
-    void onSubscribe(NimBLECharacteristic* pCharacteristic, NimBLEConnInfo& connInfo, uint16_t subValue) {}
+    void onSubscribe(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo, uint16_t subValue) {}
 };
 
 // ---------------- Activate BLE ----------------
-void activate_ble() {
+void activate_ble()
+{
+    WiFi.macAddress(macAddress);  // Populate mac address (need esp-now running before)
+
     Serial.println("[BLE] Initializing BLE");
 
     // Init BLE
@@ -96,13 +135,12 @@ void activate_ble() {
     pService = pServer->createService(SERVICE_UUID);
 
     // Create characteristic
-    NimBLECharacteristic* pCharacteristic = pService->createCharacteristic(
+    NimBLECharacteristic *pCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID,
         NIMBLE_PROPERTY::READ |
-        NIMBLE_PROPERTY::WRITE |
-        NIMBLE_PROPERTY::WRITE_NR |
-        NIMBLE_PROPERTY::NOTIFY
-    );
+            NIMBLE_PROPERTY::WRITE |
+            NIMBLE_PROPERTY::WRITE_NR |
+            NIMBLE_PROPERTY::NOTIFY);
 
     // Add CCCD descriptor
     pCharacteristic->createDescriptor(NimBLEUUID((uint16_t)0x2902));
@@ -117,8 +155,9 @@ void activate_ble() {
     advertise_ble();
 }
 
-void advertise_ble() {
-    NimBLEAdvertising* pAdvertising = NimBLEDevice::getAdvertising();
+void advertise_ble()
+{
+    NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
     pAdvertising->addServiceUUID(SERVICE_UUID);
     pAdvertising->setConnectableMode(BLE_GAP_CONN_MODE_UND);
 

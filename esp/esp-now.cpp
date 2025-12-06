@@ -14,17 +14,31 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
     memcpy(&msgIncoming, incomingData, sizeof(msgIncoming));
 
     char srcMacStr[18];
-for (int i = 0; i < 6; i++) {
-    sprintf(srcMacStr + i*3, "%02X%s", info->src_addr[i], (i < 5) ? ":" : "");
-}
+    for (int i = 0; i < 6; i++)
+    {
+        sprintf(srcMacStr + i * 3, "%02X%s", info->src_addr[i], (i < 5) ? ":" : "");
+    }
+
+    char target_str[18];
+
+    for (int i = 0; i < 6; i++)
+    {
+        sprintf(target_str + i * 3, "%02X%s", msgIncoming.target[i], (i < 5) ? ":" : "");
+    }
+
+    target_str[17] = '\0';
 
     Serial.printf(
-        "[ESP-NOW] RECV:\n\t%s\n\tSRC: %s\n\tFWD BLE: %d\n\tData: %s\n",
-        msgIncoming.command,
+        "[ESP-NOW] RECV:\n\tTARGET: %s\n\tSRC: %s\n\tFWD BLE: %d\n\tData: %s\n",
+        target_str,
         srcMacStr,
         msgIncoming.fwd_ble,
-        msgIncoming.data
-    );
+        msgIncoming.data);
+
+    if (memcmp(msgIncoming.target, macAddress, 6) == 0)
+    {
+        Serial.println("TODO: COMMAND HANDLER ESP NOW");
+    }
 }
 
 void onSendEspNow(const wifi_tx_info_t *info, esp_now_send_status_t status)
@@ -38,6 +52,17 @@ void onSendEspNow(const wifi_tx_info_t *info, esp_now_send_status_t status)
 void activate_esp_now()
 {
     WiFi.mode(WIFI_STA);
+    delay(50); // Wait for full init
+
+    WiFi.macAddress(macAddress);
+
+    char macStr[18];
+    for (int i = 0; i < 6; i++)
+    {
+        sprintf(macStr + i * 3, "%02X%s", macAddress[i], (i < 5) ? ":" : "");
+    }
+
+    Serial.printf("[ESP-NOW] Board MAC address: %s\n", macStr);
 
     if (esp_now_init() != ESP_OK)
     {
@@ -67,10 +92,19 @@ void activate_esp_now()
 void esp_now_send_message(ESPNowMessage message)
 {
     esp_now_send(broadcastAddress, (uint8_t *)&message, sizeof(message));
+
+    char target_str[18];
+
+    for (int i = 0; i < 6; i++)
+    {
+        sprintf(target_str + i * 3, "%02X%s", message.target[i], (i < 5) ? ":" : "");
+    }
+
+    target_str[17] = '\0';
+
     Serial.printf(
-        "[ESP-NOW] SEND:\n\tCMD: %s\n\tFWD BLE: %d\n\tData: %s\n",
-        message.command,
+        "[ESP-NOW] SEND:\n\tTarget: %s\n\tFWD BLE: %d\n\tData: %s\n",
+        target_str,
         message.fwd_ble,
-        message.data
-    );
+        message.data);
 }
