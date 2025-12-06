@@ -12,6 +12,7 @@ typedef struct
     char data[240];
 } ESPNowMessage;
 
+const uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 static uint8_t macAddress[6];
 
 void activate_esp_now();

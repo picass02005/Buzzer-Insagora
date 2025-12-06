@@ -91,10 +91,15 @@ public:
 
         strncpy(msg.data, data.c_str(), sizeof(msg.data) - 1);
         msg.data[sizeof(msg.data) - 1] = '\0';
-        
+
         if (memcmp(msg.target, macAddress, 6) == 0)
         {
-            Serial.println("TODO: COMMAND HANDLER BLE");
+            Serial.println("TODO: COMMAND HANDLER BLE UNICAST");
+        }
+        else if (memcmp(msg.target, broadcastAddress, 6) == 0)
+        {
+            Serial.println("TODO: COMMAND HANDLER BLE BROADCAST");
+            esp_now_send_message(msg);
         }
         else
         {
@@ -114,7 +119,7 @@ public:
 // ---------------- Activate BLE ----------------
 void activate_ble()
 {
-    WiFi.macAddress(macAddress);  // Populate mac address (need esp-now running before)
+    WiFi.macAddress(macAddress); // Populate mac address (need esp-now running before)
 
     Serial.println("[BLE] Initializing BLE");
 

@@ -5,8 +5,6 @@
 #define CHANNEL 1 // Recommended to set it to a unused value (best ones may be 6 or 11)
                   // To check: nmcli dev wifi list
 
-const uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
 void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len)
 {
     ESPNowMessage msgIncoming;
@@ -35,7 +33,7 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
         msgIncoming.fwd_ble,
         msgIncoming.data);
 
-    if (memcmp(msgIncoming.target, macAddress, 6) == 0)
+    if (memcmp(msgIncoming.target, macAddress, 6) == 0 || memcmp(msgIncoming.target, broadcastAddress, 6) == 0)
     {
         Serial.println("TODO: COMMAND HANDLER ESP NOW");
     }
