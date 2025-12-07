@@ -6,7 +6,7 @@
 
 #define SERVICE_UUID "0a46dcd2-5dcd-4177-b03d-642d8058ed6a"
 #define CHARACTERISTIC_UUID "bb651b13-47ff-4cd5-a3bc-6eb184a5a7b1"
-#define BLE_NAME "BUZZERS"
+#define BLE_NAME "BUZZERS-INSAGORA"
 
 bool is_master;
 
