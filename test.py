@@ -41,12 +41,10 @@ async def main():
         while True:
             msg = await asyncio.to_thread(input, "")
             print(f"SEND: {msg}")
-            MAC = b"\x6C\xC8\x40\x06\xE7\x3C"
+            # MAC = b"\x6C\xC8\x40\x06\xE7\x3C"
             MAC = b"\xFF\xFF\xFF\xFF\xFF\xFF"
-            await client.write_gatt_char(CHAR_UUID, MAC + msg.encode(), response=False)
+            await client.write_gatt_char(CHAR_UUID, MAC + b" " + msg.encode(), response=False)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-# TODO: N'arrive pas à être détecté par l'ESP 

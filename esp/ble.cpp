@@ -87,7 +87,7 @@ public:
 
         msg.fwd_ble = 0;
 
-        strncpy(msg.target, target.c_str(), sizeof(msg.data) - 1);
+        memcpy(msg.target, target.c_str(), sizeof(msg.target));
 
         strncpy(msg.data, data.c_str(), sizeof(msg.data) - 1);
         msg.data[sizeof(msg.data) - 1] = '\0';
@@ -106,9 +106,9 @@ public:
             esp_now_send_message(msg);
         }
 
-        // Ack: send back ACK
-        // pCharacteristic->setValue("ACK");
-        // pCharacteristic->notify();
+        // TODO: ACK (on cmd handler if no response is given)
+        msg.fwd_ble = 1;
+        ble_send_message(msg);
     }
 
     void onStatus(NimBLECharacteristic *pCharacteristic, int code) {}
@@ -119,8 +119,6 @@ public:
 // ---------------- Activate BLE ----------------
 void activate_ble()
 {
-    WiFi.macAddress(macAddress); // Populate mac address (need esp-now running before)
-
     Serial.println("[BLE] Initializing BLE");
 
     // Init BLE
@@ -172,4 +170,19 @@ void advertise_ble()
 
     pAdvertising->start();
     Serial.println("[BLE] Advertisement started");
+}
+
+void ble_send_message(ESPNowMessage msg)
+{
+    NimBLECharacteristic *pCharacteristic = pService->getCharacteristic(CHARACTERISTIC_UUID);
+    if (pCharacteristic == nullptr)
+    {
+        return;
+    }
+
+    if (msg.fwd_ble != 0)
+    {
+        pCharacteristic->setValue(msg.data);
+        pCharacteristic->notify();
+    }
 }
