@@ -73,14 +73,14 @@ If you're sending a command and its data, separate them with a space.
 
 ### Example communication
 
-In the following example, we suppose we have a generic `PING` command where respond is in the form `PONG [destination MAC address]`
+In the following example, we suppose we have a generic `PING` command where respond is in the form `PONG [destination MAC address]`.
 
 #### Example 1: direct command to gateway
 
 ```mermaid
 sequenceDiagram
     participant C as Computer
-    box Purple ESP-NOW network
+    box Grey ESP-NOW network
         participant G as Buzzer 1 (Gateway)<br>aa:aa:aa:aa:aa:aa
         participant B2 as Buzzer 2<br>bb:bb:bb:bb:bb:bb
         participant B3 as Buzzer 3<br>cc:cc:cc:cc:cc:cc
@@ -97,7 +97,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant C as Computer
-    box Purple ESP-NOW network
+    box Grey ESP-NOW network
         participant G as Buzzer 1 (Gateway)<br>aa:aa:aa:aa:aa:aa
         participant B2 as Buzzer 2<br>bb:bb:bb:bb:bb:bb
         participant B3 as Buzzer 3<br>cc:cc:cc:cc:cc:cc
@@ -116,7 +116,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant C as Computer
-    box Purple ESP-NOW network
+    box Grey ESP-NOW network
         participant G as Buzzer 1 (Gateway)<br>aa:aa:aa:aa:aa:aa
         participant B2 as Buzzer 2<br>bb:bb:bb:bb:bb:bb
         participant B3 as Buzzer 3<br>cc:cc:cc:cc:cc:cc
