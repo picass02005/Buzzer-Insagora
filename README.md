@@ -71,10 +71,79 @@ For this purpose, you can use the `broadcastAddress` constant.
 - `char data[240]`: The raw data of this packet.<br>
 If you're sending a command and its data, separate them with a space.
 
+### Example communication
+
+In the following example, we suppose we have a generic `PING` command where respond is in the form `PONG [destination MAC address]`
+
+#### Example 1: direct command to gateway
+
+```mermaid
+sequenceDiagram
+    participant C as Computer
+    box Purple ESP-NOW network
+        participant G as Buzzer 1 (Gateway)<br>aa:aa:aa:aa:aa:aa
+        participant B2 as Buzzer 2<br>bb:bb:bb:bb:bb:bb
+        participant B3 as Buzzer 3<br>cc:cc:cc:cc:cc:cc
+    end
+
+    C->>G: Target: aa:aa:aa:aa:aa:aa<br>Data: PING
+    activate G
+    G->>C: Data: PONG aa:aa:aa:aa:aa:aa
+    deactivate G
+```
+
+#### Example 2: command to a specific buzzer
+
+```mermaid
+sequenceDiagram
+    participant C as Computer
+    box Purple ESP-NOW network
+        participant G as Buzzer 1 (Gateway)<br>aa:aa:aa:aa:aa:aa
+        participant B2 as Buzzer 2<br>bb:bb:bb:bb:bb:bb
+        participant B3 as Buzzer 3<br>cc:cc:cc:cc:cc:cc
+    end
+
+    C->>G: Target: bb:bb:bb:bb:bb:bb<br>Data: PING
+    G->>B2: Target: bb:bb:bb:bb:bb:bb<br>Data: PING<br>Fwd_ble: 0
+    activate B2
+    B2->>G: Target: aa:aa:aa:aa:aa:aa<br>Data: PONG bb:bb:bb:bb:bb:bb<br>Fwd_ble: 1
+    deactivate B2
+    G->>C: Data: PONG bb:bb:bb:bb:bb:bb
+```
+
+#### Example 3: command to every buzzers
+
+```mermaid
+sequenceDiagram
+    participant C as Computer
+    box Purple ESP-NOW network
+        participant G as Buzzer 1 (Gateway)<br>aa:aa:aa:aa:aa:aa
+        participant B2 as Buzzer 2<br>bb:bb:bb:bb:bb:bb
+        participant B3 as Buzzer 3<br>cc:cc:cc:cc:cc:cc
+    end
+    
+    C->>G: Target: ff:ff:ff:ff:ff:ff<br>Data: PING
+    activate G
+    par BROADCASTING
+        G->>C: Data: PONG aa:aa:aa:aa:aa:aa
+        deactivate G
+        G->>B2: Target: ff:ff:ff:ff:ff:ff<br>Data: PING<br>Fwd_ble: 0
+        activate B2
+        B2 ->> G: target: aa:aa:aa:aa:aa:aa<br>Data: PONG bb:bb:bb:bb:bb:bb<br>Fwd_ble: 1
+        deactivate B2
+        G->>C: Data: PONG bb:bb:bb:bb:bb:bb
+        G->>B3: Target: ff:ff:ff:ff:ff:ff<br>Data: PING<br>Fwd_ble: 0
+        activate B3
+        B3 ->> G: target: aa:aa:aa:aa:aa:aa<br>Data: PONG cc:cc:cc:cc:cc:cc<br>Fwd_ble: 1
+        deactivate B3
+        G->>C: Data: PONG cc:cc:cc:cc:cc:cc
+    end
+```
+
 
 > [!TOOD]
 >
-> List of commands + sequence diagram
+> List of commands
 
 ### On board
 
