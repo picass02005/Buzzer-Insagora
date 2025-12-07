@@ -7,6 +7,6 @@ extern bool is_master;
 
 void activate_ble();
 void advertise_ble();
-void ble_send_message(ESPNowMessage msg);
+void ble_send_message(const ESPNowMessage* msg);
 
 #endif

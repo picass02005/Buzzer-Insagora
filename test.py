@@ -5,6 +5,11 @@ SERVICE_UUID = "0a46dcd2-5dcd-4177-b03d-642d8058ed6a"
 CHAR_UUID = "bb651b13-47ff-4cd5-a3bc-6eb184a5a7b1"
 TARGET_NAME = "BUZZERS"
 
+MAC = [
+    b"\xFF\xFF\xFF\xFF\xFF\xFF",
+    b"\x6C\xC8\x40\x06\xE7\x3C",
+    b"\x6C\xC8\x40\x06\xBE\x2C"
+]
 
 # --- Callback appelée à chaque notification reçue ---
 def notification_handler(sender, data):
@@ -38,12 +43,26 @@ async def main():
         await client.start_notify(CHAR_UUID, notification_handler)
         print("Notifications registered")
 
+        print("Adresses mac:")
+        for i, j in enumerate(MAC):
+            print(f"\t{i}: {''.join(f'\\x{b:02X}' for b in j)}")
+        
+        print("Example:")
+        print("\t0 PING")
+
         while True:
-            msg = await asyncio.to_thread(input, "")
-            print(f"SEND: {msg}")
-            # MAC = b"\x6C\xC8\x40\x06\xE7\x3C"
-            MAC = b"\xFF\xFF\xFF\xFF\xFF\xFF"
-            await client.write_gatt_char(CHAR_UUID, MAC + b" " + msg.encode(), response=False)
+            inp = await asyncio.to_thread(input, "")
+            try:
+                m = MAC[int(inp.split(" ")[0])]
+                msg = " ".join(inp.split(" ")[1:])
+            except ValueError:
+                print("Invalid format, defaulting to MAC[0]")
+                m = MAC[0]
+                msg = inp
+
+            msg_b = m + msg.encode()
+            print(f"SEND: {msg_b}")
+            await client.write_gatt_char(CHAR_UUID, msg_b, response=False)
 
 
 if __name__ == "__main__":

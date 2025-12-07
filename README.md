@@ -43,7 +43,7 @@ packet
 0-6: "Destination adress"
 7-31: "Command (separated from data by a space, variable length)"
 32-63: "Data (Optional, variable length)"
-64-95: "Padding (Optional, total length is 247 bytes)"
+64-95: "Padding (Optional, total length is 240 bytes)"
 ```
 
 Data are raw bytes.
@@ -68,7 +68,7 @@ To forward it, set its value to `1`, else set it to `0`.
 - `char target[6]`: Contain the target ESP MAC address for this packet.<br>
 Set it to `{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}` for a broadcast message.<br>
 For this purpose, you can use the `broadcastAddress` constant.
-- `char data[247]`: The raw data of this packet.<br>
+- `char data[240]`: The raw data of this packet.<br>
 If you're sending a command and its data, separate them with a space.
 
 

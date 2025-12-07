@@ -68,22 +68,11 @@ public:
 
         ESPNowMessage msg;
 
-        int spaceIndex = value.indexOf(' ');
-
         String target;
         String data;
 
-        if (spaceIndex == -1)
-        {
-            // no space in value
-            target = value;
-            data = "";
-        }
-        else
-        {
-            target = value.substring(0, spaceIndex);
-            data = value.substring(spaceIndex + 1);
-        }
+        target = value.substring(0, 6);
+        data = value.substring(6);
 
         msg.fwd_ble = 0;
 
@@ -99,16 +88,12 @@ public:
         else if (memcmp(msg.target, broadcastAddress, 6) == 0)
         {
             Serial.println("TODO: COMMAND HANDLER BLE BROADCAST");
-            esp_now_send_message(msg);
+            esp_now_send_message(&msg);
         }
         else
         {
-            esp_now_send_message(msg);
+            esp_now_send_message(&msg);
         }
-
-        // TODO: ACK (on cmd handler if no response is given)
-        msg.fwd_ble = 1;
-        ble_send_message(msg);
     }
 
     void onStatus(NimBLECharacteristic *pCharacteristic, int code) {}
@@ -172,17 +157,29 @@ void advertise_ble()
     Serial.println("[BLE] Advertisement started");
 }
 
-void ble_send_message(ESPNowMessage msg)
+void ble_send_message(const ESPNowMessage *msg)
 {
+    if (!is_master) {
+        return;
+    }
+
     NimBLECharacteristic *pCharacteristic = pService->getCharacteristic(CHARACTERISTIC_UUID);
     if (pCharacteristic == nullptr)
     {
         return;
     }
 
-    if (msg.fwd_ble != 0)
+    if (msg->fwd_ble != 0)
     {
-        pCharacteristic->setValue(msg.data);
+        char tmpData[sizeof(msg->data)];
+        strncpy(tmpData, msg->data, sizeof(tmpData) - 1);
+        tmpData[sizeof(tmpData) - 1] = '\0';
+
+        pCharacteristic->setValue(tmpData);
         pCharacteristic->notify();
+
+        Serial.printf(
+            "[BLE] MESSAGE SENT: Data: %s\n",
+            msg->data);
     }
 }
