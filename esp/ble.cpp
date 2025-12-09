@@ -19,7 +19,9 @@ class BLEBuzzerServerCallbacks : public NimBLEServerCallbacks
 public:
     void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
     {
+        #ifdef DEBUG
         Serial.printf("[BLE] Client connected: %s\n", connInfo.getAddress().toString().c_str());
+        #endif
 
         // Indicate successfull connection
         for (int i = 0; i < 5; i++)
@@ -33,13 +35,18 @@ public:
 
     void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
     {
+        #ifdef DEBUG
         Serial.printf("[BLE] Client disconnected: %s (Reason: %x)\n", connInfo.getAddress().toString().c_str(), reason);
+        #endif
+        
         advertise_ble();
     }
 
     void onMTUChange(uint16_t mtu, NimBLEConnInfo &connInfo)
     {
+        #ifdef DEBUG
         Serial.printf("[BLE] MTU changed: %u\n", mtu);
+        #endif
     }
 
     uint32_t onPassKeyDisplay() {}
@@ -64,7 +71,10 @@ public:
     void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
     {
         String value = pCharacteristic->getValue().c_str();
+
+        #ifdef DEBUG
         Serial.printf("[BLE] WRITE FROM %s: %s\n", connInfo.getAddress().toString().c_str(), value);
+        #endif
 
         ESPNowMessage msg;
 
@@ -83,11 +93,16 @@ public:
 
         if (memcmp(msg.target, macAddress, 6) == 0)
         {
+            #ifdef DEBUG
             Serial.println("TODO: COMMAND HANDLER BLE UNICAST");
+            #endif
         }
         else if (memcmp(msg.target, broadcastAddress, 6) == 0)
         {
+            #ifdef DEBUG
             Serial.println("TODO: COMMAND HANDLER BLE BROADCAST");
+            #endif
+
             esp_now_send_message(&msg);
         }
         else
@@ -104,7 +119,9 @@ public:
 // ---------------- Activate BLE ----------------
 void activate_ble()
 {
+    #ifdef DEBUG
     Serial.println("[BLE] Initializing BLE");
+    #endif
 
     // Init BLE
     NimBLEDevice::init(BLE_NAME);
@@ -117,7 +134,9 @@ void activate_ble()
     // Create server & attach callbacks
     pServer = NimBLEDevice::createServer();
     pServer->setCallbacks(new BLEBuzzerServerCallbacks());
+    #ifdef DEBUG
     Serial.println("[BLE] Server callbacks attached");
+    #endif
 
     // Create service
     pService = pServer->createService(SERVICE_UUID);
@@ -135,7 +154,9 @@ void activate_ble()
 
     // Attach characteristic callback
     pCharacteristic->setCallbacks(new BLEBuzzerCallback());
+    #ifdef DEBUG
     Serial.println("[BLE] Characteristic callbacks attached");
+    #endif
 
     // Start service
     pService->start();
@@ -154,7 +175,10 @@ void advertise_ble()
     pAdvertising->setScanResponseData(scanResp);
 
     pAdvertising->start();
+
+    #ifdef DEBUG
     Serial.println("[BLE] Advertisement started");
+    #endif
 }
 
 void ble_send_message(const ESPNowMessage *msg)
@@ -178,8 +202,10 @@ void ble_send_message(const ESPNowMessage *msg)
         pCharacteristic->setValue(tmpData);
         pCharacteristic->notify();
 
+        #ifdef DEBUG
         Serial.printf(
             "[BLE] MESSAGE SENT: Data: %s\n",
             msg->data);
+        #endif
     }
 }

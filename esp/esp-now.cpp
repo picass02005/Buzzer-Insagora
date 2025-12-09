@@ -1,6 +1,7 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include <stdlib.h>
+#include "pins.h"
 #include "esp-now.h"
 #include "ble.h"
 
@@ -32,12 +33,14 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
 
     target_str[17] = '\0';
 
+    #ifdef DEBUG
     Serial.printf(
         "[ESP-NOW] RECV:\n\tTARGET: %s\n\tSRC: %s\n\tFWD BLE: %d\n\tData: %s\n",
         target_str,
         srcMacStr,
         msgIncoming.fwd_ble,
         msgIncoming.data);
+    #endif
 
     if (is_master)
     {
@@ -46,7 +49,9 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
 
     if (memcmp(msgIncoming.target, macAddress, 6) == 0 || memcmp(msgIncoming.target, broadcastAddress, 6) == 0)
     {
+        #ifdef DEBUG
         Serial.println("TODO: COMMAND HANDLER ESP NOW");
+        #endif
 
         // TESTS
         
@@ -63,7 +68,9 @@ void onSendEspNow(const wifi_tx_info_t *info, esp_now_send_status_t status)
 {
     if (status == ESP_NOW_SEND_FAIL)
     {
+        #ifdef DEBUG
         Serial.println("[ESP-NOW] Failure while sending packet");
+        #endif
     }
 }
 
@@ -80,11 +87,16 @@ void activate_esp_now()
         sprintf(macStr + i * 3, "%02X%s", macAddress[i], (i < 5) ? ":" : "");
     }
 
+    #ifdef DEBUG
     Serial.printf("[ESP-NOW] Board MAC address: %s\n", macStr);
+    #endif
 
     if (esp_now_init() != ESP_OK)
     {
+        #ifdef DEBUG
         Serial.println("[ESP-NOW] Error: couldn't establish init");
+        #endif
+        
         return;
     }
 
@@ -99,11 +111,15 @@ void activate_esp_now()
 
     if (esp_now_add_peer(&peerInfo) == ESP_OK)
     {
+        #ifdef DEBUG
         Serial.println("[ESP-NOW] Broadcast added as peer");
+        #endif
     }
     else
     {
+        #ifdef DEBUG
         Serial.println("[ESP-NOW] Unable to add broadcast as peer");
+        #endif
     }
 }
 
@@ -130,9 +146,11 @@ void esp_now_send_message(const ESPNowMessage* message)
 
     target_str[17] = '\0';
 
+    #ifdef DEBUG
     Serial.printf(
         "[ESP-NOW] SEND:\n\tTarget: %s\n\tFWD BLE: %d\n\tData: %s\n",
         target_str,
         message->fwd_ble,
         message->data);
+    #endif
 }

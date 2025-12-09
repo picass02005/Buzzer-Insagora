@@ -4,8 +4,9 @@
 
 void setup()
 {
-    // DEBUG
+    #ifdef DEBUG
     Serial.begin(9600);
+    #endif
 
     // Set pin mode
     pinMode(BUTTON, INPUT_PULLUP);
