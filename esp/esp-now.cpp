@@ -1,8 +1,10 @@
+#include <Arduino.h>
 #include <esp_now.h>
 #include <WiFi.h>
 #include <stdlib.h>
 #include "pins.h"
 #include "esp-now.h"
+#include "commands.h"
 #include "ble.h"
 
 #define CHANNEL 1 // Recommended to set it to a unused value (best ones may be 6 or 11)
@@ -15,8 +17,8 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
     ESPNowMessage msgIncoming;
     memset(&msgIncoming, 0, sizeof(msgIncoming));
 
-    memcpy(&msgIncoming, incomingData, min((unsigned int) len, sizeof(msgIncoming)));
-    msgIncoming.data[sizeof(msgIncoming.data)-1] = '\0';
+    memcpy(&msgIncoming, incomingData, min((unsigned int)len, sizeof(msgIncoming)));
+    msgIncoming.data[sizeof(msgIncoming.data) - 1] = '\0';
 
     char srcMacStr[18];
     for (int i = 0; i < 6; i++)
@@ -33,14 +35,14 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
 
     target_str[17] = '\0';
 
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.printf(
         "[ESP-NOW] RECV:\n\tTARGET: %s\n\tSRC: %s\n\tFWD BLE: %d\n\tData: %s\n",
         target_str,
         srcMacStr,
         msgIncoming.fwd_ble,
         msgIncoming.data);
-    #endif
+#endif
 
     if (is_master)
     {
@@ -49,18 +51,7 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
 
     if (memcmp(msgIncoming.target, macAddress, 6) == 0 || memcmp(msgIncoming.target, broadcastAddress, 6) == 0)
     {
-        #ifdef DEBUG
-        Serial.println("TODO: COMMAND HANDLER ESP NOW");
-        #endif
-
-        // TESTS
-        
-        msgIncoming.fwd_ble = 1;
-
-        // memcpy(msgIncoming.target, broadcastAddress, 6);
-        // msgIncoming.fwd_ble = 1;
-        if (!is_master) // Avoid broadcast loop
-            esp_now_send_message(&msgIncoming);
+        commands_handler(&msgIncoming);
     }
 }
 
@@ -68,9 +59,9 @@ void onSendEspNow(const wifi_tx_info_t *info, esp_now_send_status_t status)
 {
     if (status == ESP_NOW_SEND_FAIL)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.println("[ESP-NOW] Failure while sending packet");
-        #endif
+#endif
     }
 }
 
@@ -87,16 +78,16 @@ void activate_esp_now()
         sprintf(macStr + i * 3, "%02X%s", macAddress[i], (i < 5) ? ":" : "");
     }
 
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.printf("[ESP-NOW] Board MAC address: %s\n", macStr);
-    #endif
+#endif
 
     if (esp_now_init() != ESP_OK)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.println("[ESP-NOW] Error: couldn't establish init");
-        #endif
-        
+#endif
+
         return;
     }
 
@@ -111,31 +102,30 @@ void activate_esp_now()
 
     if (esp_now_add_peer(&peerInfo) == ESP_OK)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.println("[ESP-NOW] Broadcast added as peer");
-        #endif
+#endif
     }
     else
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.println("[ESP-NOW] Unable to add broadcast as peer");
-        #endif
+#endif
     }
 }
 
-void esp_now_send_message(const ESPNowMessage* message)
+void esp_now_send_message(const ESPNowMessage *message)
 {
-    if (memcmp(message->target, macAddress, 6) == 0 && is_master)
+    if (message->fwd_ble != 0 && is_master)
     {
         ble_send_message(message);
-        return; // Avoid sending message on ESP-NOW network, redirecting through BLE if needed
-    }
-    else if (memcmp(message->target, broadcastAddress, 6) == 0 && is_master)
-    {
-        ble_send_message(message);
+        
+        if (memcmp(message->target, broadcastAddress, 6) != 0) {
+            return;
+        }
     }
 
-    esp_now_send(broadcastAddress, (uint8_t *) message, sizeof(*message));
+    esp_now_send(broadcastAddress, (uint8_t *)message, sizeof(*message));
 
     char target_str[18];
 
@@ -146,11 +136,11 @@ void esp_now_send_message(const ESPNowMessage* message)
 
     target_str[17] = '\0';
 
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.printf(
         "[ESP-NOW] SEND:\n\tTarget: %s\n\tFWD BLE: %d\n\tData: %s\n",
         target_str,
         message->fwd_ble,
         message->data);
-    #endif
+#endif
 }

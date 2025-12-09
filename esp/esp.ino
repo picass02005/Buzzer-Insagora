@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "ble.h"
 #include "esp-now.h"
 #include "pins.h"

@@ -1,7 +1,9 @@
+#include <Arduino.h>
 #include <NimBLEDevice.h>
 #include <WiFi.h>
 #include "esp-now.h"
 #include "ble.h"
+#include "commands.h"
 #include "pins.h"
 
 #define SERVICE_UUID "0a46dcd2-5dcd-4177-b03d-642d8058ed6a"
@@ -93,16 +95,11 @@ public:
 
         if (memcmp(msg.target, macAddress, 6) == 0)
         {
-            #ifdef DEBUG
-            Serial.println("TODO: COMMAND HANDLER BLE UNICAST");
-            #endif
+            commands_handler(&msg);
         }
         else if (memcmp(msg.target, broadcastAddress, 6) == 0)
         {
-            #ifdef DEBUG
-            Serial.println("TODO: COMMAND HANDLER BLE BROADCAST");
-            #endif
-
+            commands_handler(&msg);
             esp_now_send_message(&msg);
         }
         else
