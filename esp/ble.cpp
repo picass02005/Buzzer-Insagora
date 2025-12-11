@@ -3,7 +3,7 @@
 #include <WiFi.h>
 #include "esp-now.h"
 #include "ble.h"
-#include "commands.h"
+#include "command-handler.h"
 #include "pins.h"
 
 #define SERVICE_UUID "0a46dcd2-5dcd-4177-b03d-642d8058ed6a"

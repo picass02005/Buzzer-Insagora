@@ -1,7 +1,7 @@
 #include "esp-now.h"
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef COMMAND_HANDLER_H
+#define COMMAND_HANDLER_H
 
 typedef struct {
     void (*func)(ESPNowMessage);

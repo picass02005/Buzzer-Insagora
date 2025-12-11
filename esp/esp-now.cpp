@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "pins.h"
 #include "esp-now.h"
-#include "commands.h"
+#include "command-handler.h"
 #include "ble.h"
 
 #define CHANNEL 1 // Recommended to set it to a unused value (best ones may be 6 or 11)

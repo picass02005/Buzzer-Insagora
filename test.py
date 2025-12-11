@@ -1,9 +1,12 @@
 import asyncio
+import time
 from bleak import BleakClient, BleakScanner
 
 SERVICE_UUID = "0a46dcd2-5dcd-4177-b03d-642d8058ed6a"
 CHAR_UUID = "bb651b13-47ff-4cd5-a3bc-6eb184a5a7b1"
 TARGET_NAME = "BUZZERS-INSAGORA"
+
+LastSend = 0
 
 MAC = [
     b"\xFF\xFF\xFF\xFF\xFF\xFF",
@@ -13,10 +16,14 @@ MAC = [
 
 # --- Callback appelée à chaque notification reçue ---
 def notification_handler(sender, data):
-    print(f"[NOTIFICATION] From {sender} -> {data.decode(errors='ignore')}")
+    global LastSend
+    
+    print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] From {sender} -> {data.decode(errors='ignore')}")
 
 
 async def main():
+    global LastSend
+
     print("BLE scanning")
     devices = await BleakScanner.discover(timeout=5.0)
     
@@ -63,6 +70,7 @@ async def main():
             msg_b = m + msg.encode()
             print(f"SEND: {msg_b}")
             await client.write_gatt_char(CHAR_UUID, msg_b, response=False)
+            LastSend = time.time()
 
 
 if __name__ == "__main__":
