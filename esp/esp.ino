@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "ble.h"
 #include "esp-now.h"
+#include "cmd-led.h"
 #include "pins.h"
 
 void setup()
@@ -13,14 +14,9 @@ void setup()
     pinMode(BUTTON, INPUT_PULLUP);
     pinMode(ONBOARD_LED, OUTPUT);
 
-    // Welcome blink
-    for (int i = 0; i < 3; i++)
-    {
-        digitalWrite(ONBOARD_LED, HIGH);
-        delay(50);
-        digitalWrite(ONBOARD_LED, LOW);
-        delay(50);
-    }
+    // Setup LED
+    setup_led();
+    led_welcome_animation();
 
     // Set master if button pressed
     if (digitalRead(BUTTON))
@@ -31,11 +27,9 @@ void setup()
     {
         is_master = true;
 
-        digitalWrite(ONBOARD_LED, HIGH);
-        delay(500);
-        digitalWrite(ONBOARD_LED, LOW);
-
         activate_ble();
+
+        led_master();
     }
 
     activate_esp_now();

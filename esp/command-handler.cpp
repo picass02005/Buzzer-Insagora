@@ -5,19 +5,22 @@
 #include "pins.h"
 
 #include "cmd-ping.h"
+#include "cmd-led.h"
 
 
 void commands_handler(ESPNowMessage *msg)
 {
-    #ifdef DEBUG
-    Serial.printf("TODO: commands handler: %s\n", msg->data);
-    #endif
-
     if (memcmp(msg->data, "PING", 4) == 0)
         command_task_maker(ping_cmd, msg);
+    else if (memcmp(msg->data, "SLED", 4) == 0)
+        command_task_maker(set_led_cmd, msg);
+    else if (memcmp(msg->data, "CLED", 4) == 0)
+        command_task_maker(clear_led_cmd, msg);
+    else if (memcmp(msg->data, "GLED", 4) == 0)
+        command_task_maker(get_led_nb_cmd, msg);
 }
 
-void command_task(void* pvParameters)
+void command_task(void *pvParameters)
 {
     CommandTaskParams *params = (CommandTaskParams *)pvParameters;
 
@@ -44,6 +47,7 @@ void command_task_maker(void (*func)(ESPNowMessage), ESPNowMessage *message, int
     );
 }
 
-void command_task_maker(void (*func)(ESPNowMessage), ESPNowMessage *message) {
+void command_task_maker(void (*func)(ESPNowMessage), ESPNowMessage *message)
+{
     command_task_maker(func, message, 1);
 }

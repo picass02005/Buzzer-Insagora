@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "esp-now.h"
 #include "ble.h"
+#include "cmd-led.h"
 #include "command-handler.h"
 #include "pins.h"
 
@@ -21,34 +22,29 @@ class BLEBuzzerServerCallbacks : public NimBLEServerCallbacks
 public:
     void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.printf("[BLE] Client connected: %s\n", connInfo.getAddress().toString().c_str());
-        #endif
+#endif
 
-        // Indicate successfull connection
-        for (int i = 0; i < 5; i++)
-        {
-            digitalWrite(ONBOARD_LED, HIGH);
-            delay(100);
-            digitalWrite(ONBOARD_LED, LOW);
-            delay(100);
-        }
+        led_bluetooth_connect();
     }
 
     void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.printf("[BLE] Client disconnected: %s (Reason: %x)\n", connInfo.getAddress().toString().c_str(), reason);
-        #endif
-        
+#endif
+
         advertise_ble();
+
+        led_bluetooth_connect();
     }
 
     void onMTUChange(uint16_t mtu, NimBLEConnInfo &connInfo)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.printf("[BLE] MTU changed: %u\n", mtu);
-        #endif
+#endif
     }
 
     uint32_t onPassKeyDisplay() {}
@@ -72,26 +68,26 @@ public:
 
     void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
     {
-        String value = pCharacteristic->getValue().c_str();
+        char value[246];
+        memset(value, 0, sizeof(value));
+        std::string raw = pCharacteristic->getValue();
+        int length = raw.size();
+        if (length > 246)
+            length = 246;
+        memcpy(value, raw.data(), length);
 
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.printf("[BLE] WRITE FROM %s: %s\n", connInfo.getAddress().toString().c_str(), value);
-        #endif
+#endif
 
         ESPNowMessage msg;
+        
+        memcpy(msg.target, value, 6);
 
-        String target;
-        String data;
-
-        target = value.substring(0, 6);
-        data = value.substring(6);
+        memcpy(msg.data, &value[6], sizeof(msg.data));
+        msg.data[sizeof(msg.data) - 1] = '\0';
 
         msg.fwd_ble = 0;
-
-        memcpy(msg.target, target.c_str(), sizeof(msg.target));
-
-        strncpy(msg.data, data.c_str(), sizeof(msg.data) - 1);
-        msg.data[sizeof(msg.data) - 1] = '\0';
 
         if (memcmp(msg.target, macAddress, 6) == 0)
         {
@@ -116,9 +112,9 @@ public:
 // ---------------- Activate BLE ----------------
 void activate_ble()
 {
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.println("[BLE] Initializing BLE");
-    #endif
+#endif
 
     // Init BLE
     NimBLEDevice::init(BLE_NAME);
@@ -131,9 +127,9 @@ void activate_ble()
     // Create server & attach callbacks
     pServer = NimBLEDevice::createServer();
     pServer->setCallbacks(new BLEBuzzerServerCallbacks());
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.println("[BLE] Server callbacks attached");
-    #endif
+#endif
 
     // Create service
     pService = pServer->createService(SERVICE_UUID);
@@ -151,9 +147,9 @@ void activate_ble()
 
     // Attach characteristic callback
     pCharacteristic->setCallbacks(new BLEBuzzerCallback());
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.println("[BLE] Characteristic callbacks attached");
-    #endif
+#endif
 
     // Start service
     pService->start();
@@ -173,14 +169,15 @@ void advertise_ble()
 
     pAdvertising->start();
 
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.println("[BLE] Advertisement started");
-    #endif
+#endif
 }
 
 void ble_send_message(const ESPNowMessage *msg)
 {
-    if (!is_master) {
+    if (!is_master)
+    {
         return;
     }
 
@@ -199,10 +196,10 @@ void ble_send_message(const ESPNowMessage *msg)
         pCharacteristic->setValue(tmpData);
         pCharacteristic->notify();
 
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.printf(
             "[BLE] MESSAGE SENT: Data: %s\n",
             msg->data);
-        #endif
+#endif
     }
 }

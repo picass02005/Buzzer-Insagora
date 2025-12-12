@@ -17,7 +17,7 @@ MAC = [
 # --- Callback appelée à chaque notification reçue ---
 def notification_handler(sender, data):
     global LastSend
-    
+
     print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] From {sender} -> {data.decode(errors='ignore')}")
 
 
@@ -56,6 +56,9 @@ async def main():
         
         print("Example:")
         print("\t0 PING")
+
+        await asyncio.sleep(0.5)
+        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED \xFF\x00\x00\x00\xFF\x00\x00\x00\xFF", response=False)
 
         while True:
             inp = await asyncio.to_thread(input, "")
