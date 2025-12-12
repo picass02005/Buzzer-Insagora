@@ -54,15 +54,17 @@ void led_bluetooth_connect()
 
     for (int j = 0; j < 2; j++)
     {
+        ws2812b.clear();
         for (int i = 0; i < LED_NB; i++)
         {
             ws2812b.setPixelColor(i, ws2812b.Color(0, 0, 255));
         }
         ws2812b.show();
-        delay(250);
+        delay(125);
 
         ws2812b.clear();
         ws2812b.show();
+        delay(125);
     }
 
     digitalWrite(ONBOARD_LED, LOW);
@@ -76,15 +78,17 @@ void led_bluetooth_disconnect()
 
     for (int j = 0; j < 2; j++)
     {
+        ws2812b.clear();
         for (int i = 0; i < LED_NB; i++)
         {
             ws2812b.setPixelColor(i, ws2812b.Color(255, 0, 0));
         }
         ws2812b.show();
-        delay(250);
+        delay(125);
 
         ws2812b.clear();
         ws2812b.show();
+        delay(125);
     }
 
     digitalWrite(ONBOARD_LED, LOW);
@@ -98,10 +102,10 @@ void led_master()
 
     for (int i = 0; i < LED_NB; i++)
     {
-        ws2812b.setPixelColor(i, ws2812b.Color(0, 0, 255));
+        ws2812b.setPixelColor(i, ws2812b.Color(255, 0, 255));
     }
     ws2812b.show();
-    delay(1000);
+    delay(500);
 
     ws2812b.clear();
     ws2812b.show();

@@ -37,7 +37,7 @@ public:
 
         advertise_ble();
 
-        led_bluetooth_connect();
+        led_bluetooth_disconnect();
     }
 
     void onMTUChange(uint16_t mtu, NimBLEConnInfo &connInfo)
