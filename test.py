@@ -57,8 +57,8 @@ async def main():
         print("Example:")
         print("\t0 PING")
 
-        await asyncio.sleep(0.5)
-        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED \xFF\x00\x00\x00\xFF\x00\x00\x00\xFF", response=False)
+        await asyncio.sleep(0.25)
+        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\xff\x00\x00\x00\x00\xff"*4, response=False)
 
         while True:
             inp = await asyncio.to_thread(input, "")
