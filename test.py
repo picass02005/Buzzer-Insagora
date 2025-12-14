@@ -59,6 +59,18 @@ async def main():
 
         await asyncio.sleep(0.25)
         await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\xff\x00\x00\x00\x00\xff"*4, response=False)
+        await asyncio.sleep(0.25)
+
+        """
+        while True:
+            for i in range(8):
+                leds = bytearray(24)
+                leds[i*3 + 0] = 255
+                leds[i*3 + 1] = 0
+                leds[i*3 + 2] = 0
+                await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + leds, response=False)
+                await asyncio.sleep(0.05)
+        """
 
         while True:
             inp = await asyncio.to_thread(input, "")
