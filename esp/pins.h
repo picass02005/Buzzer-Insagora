@@ -6,6 +6,6 @@
 #define LED_STRIP 5  // LED strip pin
 #define LED_NB 8      // Number of LED
 
-#define DEBUG  // Allow serial port prints
+// #define DEBUG  // Allow serial port prints
 
 #endif

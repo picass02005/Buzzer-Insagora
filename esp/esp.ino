@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include "ble.h"
 #include "esp-now.h"
-#include "cmd-led.h"
 #include "pins.h"
+#include "cmd-led.h"
+#include "cmd-clock.h"
 
 void setup()
 {
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.begin(9600);
-    #endif
+#endif
 
     // Set pin mode
     pinMode(BUTTON, INPUT_PULLUP);
@@ -33,6 +34,9 @@ void setup()
     }
 
     activate_esp_now();
+
+    // Setup clock
+    reset_clock();
 }
 
 void loop()

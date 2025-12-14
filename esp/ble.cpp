@@ -95,8 +95,8 @@ public:
         }
         else if (memcmp(msg.target, broadcastAddress, 6) == 0)
         {
-            commands_handler(&msg);
             esp_now_send_message(&msg);
+            commands_handler(&msg);
         }
         else
         {

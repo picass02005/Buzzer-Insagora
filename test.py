@@ -18,7 +18,8 @@ MAC = [
 def notification_handler(sender, data):
     global LastSend
 
-    print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] From {sender} -> {data.decode(errors='ignore')}")
+    # print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] From {sender} -> {data.decode(errors='ignore')}")
+    print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] {data.decode(errors='ignore')}")
 
 
 async def main():
@@ -58,10 +59,11 @@ async def main():
         print("\t0 PING")
 
         await asyncio.sleep(0.25)
-        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\xff\x00\x00\x00\x00\xff"*4, response=False)
-        await asyncio.sleep(0.25)
+        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x08\x00\x00\x00\x00\x08"*4, response=False)
 
         """
+        await asyncio.sleep(0.25)
+
         while True:
             for i in range(8):
                 leds = bytearray(24)
