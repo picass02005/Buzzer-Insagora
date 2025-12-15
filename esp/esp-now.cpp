@@ -11,6 +11,7 @@
                   // To check: nmcli dev wifi list
 
 uint8_t macAddress[6];
+char macStr[18];
 
 void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len)
 {
@@ -72,7 +73,6 @@ void activate_esp_now()
 
     WiFi.macAddress(macAddress);
 
-    char macStr[18];
     for (int i = 0; i < 6; i++)
     {
         sprintf(macStr + i * 3, "%02X%s", macAddress[i], (i < 5) ? ":" : "");

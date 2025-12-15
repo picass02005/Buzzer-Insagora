@@ -2,6 +2,7 @@
 #include "ble.h"
 #include "esp-now.h"
 #include "pins.h"
+#include "button-interrupt.h"
 #include "cmd-led.h"
 #include "cmd-clock.h"
 
@@ -34,6 +35,8 @@ void setup()
     }
 
     activate_esp_now();
+
+    init_button_interrupt();
 
     // Setup clock
     reset_clock();

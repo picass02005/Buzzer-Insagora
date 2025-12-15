@@ -62,23 +62,19 @@ void lltoa(long long value, char* buf) {
 
 void get_clock_cmd(ESPNowMessage msg)
 {
-    char mac_str[18];
+    char mac_str_tmp[sizeof(macStr)];
     char clock_buffer[22];
 
-    for (int i = 0; i < 6; i++)
-    {
-        sprintf(mac_str + i * 3, "%02X%s", macAddress[i], (i < 5) ? ":" : "");
-    }
+    memcpy(&mac_str_tmp, &macStr, sizeof(macStr));
+    mac_str_tmp[sizeof(mac_str_tmp) - 1] = ' ';
 
-    mac_str[17] = ' ';
-
-    lltoa(get_clock(), &(clock_buffer[0]));
+    lltoa(get_clock(), clock_buffer);
 
     ESPNowMessage res;
 
-    memcpy(&res.data, &mac_str, sizeof(mac_str));
-    memcpy(&res.data[sizeof(mac_str)], &clock_buffer, sizeof(clock_buffer));
-    // snprintf(res.data, sizeof(res.data), "%lld %s", get_clock(), mac_str); // %lld => long long decimal
+    memcpy(&res.data, &mac_str_tmp, sizeof(mac_str_tmp));
+    memcpy(&(res.data[sizeof(mac_str_tmp)]), &clock_buffer, sizeof(clock_buffer));
+
     memset(&res.target, 0, sizeof(res.target));
 
     res.fwd_ble = 1;
