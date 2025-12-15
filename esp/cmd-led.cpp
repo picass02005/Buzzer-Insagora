@@ -122,7 +122,7 @@ void set_led_cmd(ESPNowMessage msg)
 #ifdef DEBUG
     char print[200];
     memset(print, 0, sizeof(print));
-    
+
     memcpy(print, "[LED] SETTING:", 14);
 #endif
 
@@ -133,7 +133,7 @@ void set_led_cmd(ESPNowMessage msg)
         ws2812b.setPixelColor(i, ws2812b.Color(color[0], color[1], color[2]));
 
 #ifdef DEBUG
-        sprintf(&(print[14 + i*7]), " %02X%02X%02X", color[0], color[1], color[2]);
+        sprintf(&(print[14 + i * 7]), " %02X%02X%02X", color[0], color[1], color[2]);
 #endif
     }
 

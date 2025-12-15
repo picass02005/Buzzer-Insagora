@@ -9,7 +9,6 @@
 // Delay between each packet
 #define AUTO_SET_CLK_DELAY 10
 
-
 int64_t clock_offset;
 
 int64_t get_clock()
@@ -28,7 +27,7 @@ void reset_clock()
 {
     if (is_master == true)
     {
-        clock_offset = millis();  // Reset overall clock to 0
+        clock_offset = millis(); // Reset overall clock to 0
     }
     else
     {
@@ -36,7 +35,8 @@ void reset_clock()
     }
 }
 
-void lltoa(long long value, char* buf) {
+void lltoa(long long value, char *buf)
+{
     // Write value in buf
     // buf need to be at least 22 chars long
     // Qicker than sprintf
@@ -48,15 +48,18 @@ void lltoa(long long value, char* buf) {
     if (neg)
         value = -value;
 
-    do {
+    do
+    {
         tmp[i++] = '0' + (value % 10);
         value /= 10;
     } while (value);
 
     int j = 0;
-    if (neg) buf[j++] = '-';
+    if (neg)
+        buf[j++] = '-';
 
-    while (i--) buf[j++] = tmp[i];
+    while (i--)
+        buf[j++] = tmp[i];
     buf[j] = '\0';
 }
 
@@ -100,20 +103,24 @@ void set_clock_cmd(ESPNowMessage msg)
 
     old_clock = actual_millis - clock_offset;
 
-    if (clock_offset == INT64_MAX || s_clock < old_clock) {
+    if (clock_offset == INT64_MAX || s_clock < old_clock)
+    {
         clock_offset = millis() - s_clock;
-        #ifdef DEBUG
+#ifdef DEBUG
         Serial.printf("[CLOCK] Internal clock updated: old=%lld new=%lld get_clock=%lld\n", old_clock, s_clock, get_clock());
-        #endif
+#endif
     }
 }
 
 void auto_set_clock_cmd(ESPNowMessage msg)
 {
-    if (is_master == true) {
-        reset_clock();  // Reset master clock
-    } else {
-        return;  // Avoid other buzzers to be the "giver"
+    if (is_master == true)
+    {
+        reset_clock(); // Reset master clock
+    }
+    else
+    {
+        return; // Avoid other buzzers to be the "giver"
     }
 
     ESPNowMessage out_msg;
@@ -128,7 +135,8 @@ void auto_set_clock_cmd(ESPNowMessage msg)
 
     delay(AUTO_SET_CLK_DELAY);
 
-    for (int i=0; i<AUTO_SET_CLK_NB; i++) {
+    for (int i = 0; i < AUTO_SET_CLK_NB; i++)
+    {
         memcpy(out_msg.data, "SCLK ", 5);
         lltoa(get_clock(), &(out_msg.data[5]));
         esp_now_send_message(&out_msg);

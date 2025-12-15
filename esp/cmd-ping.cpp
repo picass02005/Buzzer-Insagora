@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include "esp-now.h"
 
-void ping_cmd(ESPNowMessage msg) {
+void ping_cmd(ESPNowMessage msg)
+{
     ESPNowMessage res;
     snprintf(res.data, sizeof(res.data), "PONG %s", macStr);
     memset(&res.target, 0, sizeof(res.target));

@@ -3,7 +3,7 @@
 
 #define BUTTON 15     // Button is normally closed
 #define ONBOARD_LED 2 // Onboard LED
-#define LED_STRIP 5  // LED strip pin
+#define LED_STRIP 5   // LED strip pin
 #define LED_NB 8      // Number of LED
 
 // #define DEBUG  // Allow serial port prints

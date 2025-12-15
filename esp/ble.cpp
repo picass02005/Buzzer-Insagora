@@ -81,7 +81,7 @@ public:
 #endif
 
         ESPNowMessage msg;
-        
+
         memcpy(msg.target, value, 6);
 
         memcpy(msg.data, &value[6], sizeof(msg.data));

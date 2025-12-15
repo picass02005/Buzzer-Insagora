@@ -119,8 +119,9 @@ void esp_now_send_message(const ESPNowMessage *message)
     if (message->fwd_ble != 0 && is_master)
     {
         ble_send_message(message);
-        
-        if (memcmp(message->target, broadcastAddress, 6) != 0) {
+
+        if (memcmp(message->target, broadcastAddress, 6) != 0)
+        {
             return;
         }
     }

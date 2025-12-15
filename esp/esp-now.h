@@ -18,7 +18,7 @@ extern uint8_t macAddress[6];
 extern char macStr[18];
 
 void activate_esp_now();
-void esp_now_send_message(const ESPNowMessage* message);
+void esp_now_send_message(const ESPNowMessage *message);
 
 void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len);
 void onSendEspNow(const wifi_tx_info_t *info, esp_now_send_status_t status);

@@ -9,23 +9,28 @@
 
 QueueHandle_t buttonQueue;
 
-
-void IRAM_ATTR button_callback() {
+void IRAM_ATTR button_callback()
+{
     const int64_t clock = get_clock();
 
     if (uxQueueSpacesAvailable(buttonQueue) > 0)
-    {xQueueSendFromISR(buttonQueue, &clock, NULL);}
+    {
+        xQueueSendFromISR(buttonQueue, &clock, NULL);
+    }
 }
 
-void button_task(void *params) {
+void button_task(void *params)
+{
     int64_t clock;
     char clock_str[22];
 
-    while (true) {
-        if (xQueueReceive(buttonQueue, &clock, portMAX_DELAY)) {
-            #ifdef DEBUG
+    while (true)
+    {
+        if (xQueueReceive(buttonQueue, &clock, portMAX_DELAY))
+        {
+#ifdef DEBUG
             Serial.println("[BUTTON] Pressed");
-            #endif
+#endif
 
             lltoa(clock, clock_str);
 
@@ -41,36 +46,37 @@ void button_task(void *params) {
 
             res.fwd_ble = 1;
 
-            for (int i=0; i<INTERRUPT_PCK_SEND; i++) {
+            for (int i = 0; i < INTERRUPT_PCK_SEND; i++)
+            {
                 esp_now_send_message(&res);
                 vTaskDelay(INTERRUPT_PCK_DELAY);
             }
 
-            xQueueReset(buttonQueue);  // Reset the queue to avoid bouncing
-    }
-    vTaskDelay(INTERRUPT_TASK_DELAY);
+            xQueueReset(buttonQueue); // Reset the queue to avoid bouncing
+        }
+        vTaskDelay(INTERRUPT_TASK_DELAY);
     }
 }
 
-void init_button_interrupt() {
-    buttonQueue = xQueueCreate(1, sizeof(int64_t));  // Queue can take up to 5 elements
+void init_button_interrupt()
+{
+    buttonQueue = xQueueCreate(1, sizeof(int64_t)); // Queue can take up to 5 elements
 
     xTaskCreate(
         button_task,
         "Button queue task",
-        4096,      // Default stack size
+        4096, // Default stack size
         NULL,
         1,
-        NULL
-    );
+        NULL);
 
     attachInterrupt(
         digitalPinToInterrupt(BUTTON),
         button_callback,
-        FALLING   // Trigger when button is pressed
+        FALLING // Trigger when button is pressed
     );
 
-    #ifdef DEBUG
+#ifdef DEBUG
     Serial.println("[BUTTON] Callback attached");
-    #endif
+#endif
 }
