@@ -156,3 +156,10 @@ sequenceDiagram
 ### Frontend
 
 > [!TOOD]
+
+# License
+
+> [!TOOD] Add header in every file
+
+This project is distribued under the MIT license.
+For more information: https://opensource.org/licenses/MIT
