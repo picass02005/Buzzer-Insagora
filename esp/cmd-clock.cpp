@@ -7,7 +7,7 @@
 // Number of packets sent to automatically set clock
 #define AUTO_SET_CLK_NB 10
 // Delay between each packet
-#define AUTO_SET_CLK_DELAY 5
+#define AUTO_SET_CLK_DELAY 10
 
 
 int64_t clock_offset;
@@ -36,19 +36,49 @@ void reset_clock()
     }
 }
 
+void lltoa(long long value, char* buf) {
+    // Write value in buf
+    // buf need to be at least 22 chars long
+    // Qicker than sprintf
+
+    char tmp[21];
+    int i = 0;
+    int neg = value < 0;
+
+    if (neg)
+        value = -value;
+
+    do {
+        tmp[i++] = '0' + (value % 10);
+        value /= 10;
+    } while (value);
+
+    int j = 0;
+    if (neg) buf[j++] = '-';
+
+    while (i--) buf[j++] = tmp[i];
+    buf[j] = '\0';
+}
+
 void get_clock_cmd(ESPNowMessage msg)
 {
     char mac_str[18];
+    char clock_buffer[22];
 
     for (int i = 0; i < 6; i++)
     {
         sprintf(mac_str + i * 3, "%02X%s", macAddress[i], (i < 5) ? ":" : "");
     }
 
-    mac_str[17] = '\0';
+    mac_str[17] = ' ';
+
+    lltoa(get_clock(), &(clock_buffer[0]));
 
     ESPNowMessage res;
-    snprintf(res.data, sizeof(res.data), "%lld %s", get_clock(), mac_str); // %lld => long long decimal
+
+    memcpy(&res.data, &mac_str, sizeof(mac_str));
+    memcpy(&res.data[sizeof(mac_str)], &clock_buffer, sizeof(clock_buffer));
+    // snprintf(res.data, sizeof(res.data), "%lld %s", get_clock(), mac_str); // %lld => long long decimal
     memset(&res.target, 0, sizeof(res.target));
 
     res.fwd_ble = 1;
@@ -84,7 +114,9 @@ void set_clock_cmd(ESPNowMessage msg)
 
 void auto_set_clock_cmd(ESPNowMessage msg)
 {
-    if (is_master == false) {
+    if (is_master == true) {
+        reset_clock();  // Reset master clock
+    } else {
         return;  // Avoid other buzzers to be the "giver"
     }
 
@@ -93,13 +125,16 @@ void auto_set_clock_cmd(ESPNowMessage msg)
     out_msg.fwd_ble = 0;
 
     // Reset all clocks
-    snprintf(out_msg.data, sizeof(out_msg.data), "RCLK");
+    memcpy(&out_msg.data, "RCLK\0", 5);
+
+    delay(3); // Avoid spamming other buffers
     esp_now_send_message(&out_msg);
 
     delay(AUTO_SET_CLK_DELAY);
 
     for (int i=0; i<AUTO_SET_CLK_NB; i++) {
-        snprintf(out_msg.data, sizeof(out_msg.data), "SCLK %lld", get_clock());
+        memcpy(out_msg.data, "SCLK ", 5);
+        lltoa(get_clock(), &(out_msg.data[5]));
         esp_now_send_message(&out_msg);
 
         delay(AUTO_SET_CLK_DELAY);
@@ -107,7 +142,7 @@ void auto_set_clock_cmd(ESPNowMessage msg)
 
     // Confirmation message
     ESPNowMessage res;
-    snprintf(res.data, sizeof(res.data), "ACLK success");
+    memcpy(&res.data, "ACLK success\0", 13);
     memset(&res.target, 0, sizeof(res.target));
 
     res.fwd_ble = 1;

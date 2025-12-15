@@ -10,7 +10,7 @@ LastSend = 0
 
 MAC = [
     b"\xFF\xFF\xFF\xFF\xFF\xFF",
-    b"\x6C\xC8\x40\x06\xE7\x3C",
+    b"\x78\x1C\x3C\x2D\x57\x94",
     b"\x6C\xC8\x40\x06\xBE\x2C"
 ]
 
@@ -60,9 +60,9 @@ async def main():
 
         await asyncio.sleep(0.25)
         await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x08\x00\x00\x00\x00\x08"*4, response=False)
+        await asyncio.sleep(0.25)
 
         """
-        await asyncio.sleep(0.25)
 
         while True:
             for i in range(8):
@@ -73,6 +73,15 @@ async def main():
                 await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + leds, response=False)
                 await asyncio.sleep(0.05)
         """
+
+        while True:
+            print("ACLK")
+            await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFACLK", response=False)
+            LastSend = time.time()
+            await asyncio.sleep(1)
+            await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFGCLK", response=False)
+            LastSend = time.time()
+            await asyncio.sleep(1)
 
         while True:
             inp = await asyncio.to_thread(input, "")
