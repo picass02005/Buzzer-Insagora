@@ -160,7 +160,8 @@ void clear_led_cmd(ESPNowMessage msg)
 void get_led_nb_cmd(ESPNowMessage msg)
 {
     ESPNowMessage res;
-    snprintf(res.data, sizeof(res.data), "%d", LED_NB);
+    snprintf(res.data, sizeof(res.data), "GLED %d", LED_NB);
+
     memset(&res.target, 0, sizeof(res.target));
 
     res.fwd_ble = 1;

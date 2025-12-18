@@ -82,8 +82,9 @@ void get_clock_cmd(ESPNowMessage msg)
 
     ESPNowMessage res;
 
-    memcpy(&res.data, &mac_str_tmp, sizeof(mac_str_tmp));
-    memcpy(&(res.data[sizeof(mac_str_tmp)]), &clock_buffer, sizeof(clock_buffer));
+    memcpy(&res.data, "GCLK ", 5);
+    memcpy(&(res.data[5]), &mac_str_tmp, sizeof(mac_str_tmp));
+    memcpy(&(res.data[sizeof(mac_str_tmp) + 5]), &clock_buffer, sizeof(clock_buffer));
 
     memset(&res.target, 0, sizeof(res.target));
 

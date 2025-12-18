@@ -59,7 +59,8 @@ async def main():
         print("\t0 PING")
 
         await asyncio.sleep(0.25)
-        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x08\x00\x00\x00\x00\x08"*4, response=False)
+        await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x08\x08\x00\x00\x00\x08"*4, response=False)
+        # await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x00\x08\x08"*8, response=False)
         await asyncio.sleep(0.25)
 
         """

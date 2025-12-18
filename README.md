@@ -141,13 +141,124 @@ sequenceDiagram
 ```
 
 
-> [!TOOD]
->
-> List of commands
+### Commands
+#### Ping
+
+Command used to ping any ESP.
+Response contains the target MAC address (in this example : `AA:BB:CC:DD:EE:FF`).
+
+> Command : `PING`
+> Response : `PONG AA:BB:CC:DD:EE:FF`
+
+#### Get clock
+
+Command used to get internal clock value.
+If internal clock is not set, its value will be `INT64_MAX` (9,223,372,036,854,775,807)
+
+In this example, MAC address is `AA:BB:CC:DD:EE:FF`, its internal clock is `1234`.
+
+> Command : `GCLK`
+> Response: `GCLK AA:BB:CC:DD:EE:FF 1234`
+
+#### Reset clock
+
+Reset an ESP internal clock.
+
+For the master, default value is `0`.
+For another ESP, default value is `INT64_MAX` (9,223,372,036,854,775,807).
+
+This command does not send any response.
+
+> Command: `RCLK`
+
+#### Set clock
+
+Command used to set internal clock.
+This command does not send any response.
+
+The internal clock is only set if new clock value is less than actual clock value.
+
+In this example, we set the internal clock to `1234`.
+
+> Command: `SCLK 1234`
+
+#### Automatic set clock
+
+Command used to delegate the set clock procedure to the master ESP.
+This will execute the following commands:
+
+1. `RCLK` (broadcast)
+2. `SCLK actual_clock` (broadcast, actual_clock being the clock of master)
+
+The `SCLK` is repeated a number of time defined by `AUTO_SET_CLK_NB` in `cmd-clock.cpp`.
+
+> Command: `ACLK`
+> Response: `ACLK success`
+
+#### Get LED number
+
+This command return the number of LED installed on a buzzer.
+
+In this example, we suppose the buzzer have 8 LEDs.
+
+> Command: `GLED`
+> Response: `GLED 8`
+
+#### Set LED
+
+This command set the LEDs color on a buzzer.
+This command does not send any response.
+
+Each LED color is represented on 3 bytes in raw value.
+
+Its PDU is defined as following:
+
+```mermaid
+packet
+0-5: "SLED [space]"
+6: "R_1"
+7: "G_1"
+8: "B_1"
+9: "R_2"
+10: "G_2"
+11: "B_2"
+12-31: "Other LED color (variable length)"
+```
+
+For the next example, there is a quick reminder from extended ASCII codes:
+```
+ASCII -> DEC | HEX
+!     -> 33  | 0x21
+ÿ     -> 255 | 0xff
+```
+
+In this example, I have a buzzer with 3 LED, and I want to set them to `0xFF2121`, `0x21FF21` and `0x2121FF`. This translate into `ÿ!!`, `!ÿ!` and `!!ÿ`.
+
+> Command: `SLED ÿ!!!ÿ!!!ÿ`
+
+#### Clear LED
+
+This command turn off all LEDs on a buzzer.
+This command does not send any response.
+
+> Command: `CLED`
 
 ### On board
 
-> [!TOOD]
+#### Which callback to use for communication?
+
+For every communication (from master buzzer or other buzzers), send messages using `esp_now_send_message` (defined in `esp-now.h`).
+
+#### How to add a command?
+
+If you want to add commands, you need to define a callback with this signature:
+
+```cpp
+void MyAwesomeCommand(ESPNowMessage message);
+```
+
+The message passed is the original message.
+You then need to add it in `commands_handler` (`commands_handler.h`).
 
 ### Backend
 
