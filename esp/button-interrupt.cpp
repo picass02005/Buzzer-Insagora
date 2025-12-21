@@ -15,6 +15,7 @@
 #define INTERRUPT_TASK_DELAY 10
 
 QueueHandle_t buttonQueue;
+uint8_t buttonPressId = 0;
 
 void IRAM_ATTR button_callback()
 {
@@ -51,6 +52,7 @@ void button_task(void *params)
 
             memset(&res.target, 0, sizeof(res.target));
 
+            res.cmd_id = buttonPressId++;  // Return current value then ++
             res.fwd_ble = 1;
 
             for (int i = 0; i < INTERRUPT_PCK_SEND; i++)

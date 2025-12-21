@@ -88,6 +88,7 @@ void get_clock_cmd(ESPNowMessage msg)
 
     memset(&res.target, 0, sizeof(res.target));
 
+    res.cmd_id = msg.cmd_id;
     res.fwd_ble = 1;
     esp_now_send_message(&res);
 }
@@ -157,6 +158,7 @@ void auto_set_clock_cmd(ESPNowMessage msg)
     memcpy(&res.data, "ACLK success\0", 13);
     memset(&res.target, 0, sizeof(res.target));
 
+    res.cmd_id = msg.cmd_id;
     res.fwd_ble = 1;
     esp_now_send_message(&res);
 }

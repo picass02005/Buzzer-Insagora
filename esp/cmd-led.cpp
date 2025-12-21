@@ -164,6 +164,7 @@ void get_led_nb_cmd(ESPNowMessage msg)
 
     memset(&res.target, 0, sizeof(res.target));
 
+    res.cmd_id = msg.cmd_id;
     res.fwd_ble = 1;
     esp_now_send_message(&res);
 }

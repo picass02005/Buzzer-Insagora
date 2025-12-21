@@ -91,7 +91,9 @@ public:
 
         memcpy(msg.target, value, 6);
 
-        memcpy(msg.data, &value[6], sizeof(msg.data));
+        msg.cmd_id = value[6];
+
+        memcpy(msg.data, &value[7], sizeof(msg.data));
         msg.data[sizeof(msg.data) - 1] = '\0';
 
         msg.fwd_ble = 0;
@@ -196,8 +198,9 @@ void ble_send_message(const ESPNowMessage *msg)
 
     if (msg->fwd_ble != 0)
     {
-        char tmpData[sizeof(msg->data)];
-        strncpy(tmpData, msg->data, sizeof(tmpData) - 1);
+        char tmpData[sizeof(msg->data) + 1];
+        tmpData[0] = msg->cmd_id;
+        strncpy(&(tmpData[1]), msg->data, sizeof(tmpData) - 1);
         tmpData[sizeof(tmpData) - 1] = '\0';
 
         pCharacteristic->setValue(tmpData);

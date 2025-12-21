@@ -16,6 +16,7 @@ typedef struct __attribute__((packed))
 {
     char fwd_ble;
     char target[6];
+    uint8_t cmd_id;
     char data[240];
 } ESPNowMessage;
 

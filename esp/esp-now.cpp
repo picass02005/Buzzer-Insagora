@@ -45,9 +45,10 @@ void onReceiveEspNow(const esp_now_recv_info_t *info, const uint8_t *incomingDat
 
 #ifdef DEBUG
     Serial.printf(
-        "[ESP-NOW] RECV:\n\tTARGET: %s\n\tSRC: %s\n\tFWD BLE: %d\n\tData: %s\n",
+        "[ESP-NOW] RECV:\n\tTARGET: %s\n\tSRC: %s\n\tCMD ID: %d\n\tFWD BLE: %d\n\tData: %s\n",
         target_str,
         srcMacStr,
+        msgIncoming.cmd_id
         msgIncoming.fwd_ble,
         msgIncoming.data);
 #endif
@@ -146,8 +147,9 @@ void esp_now_send_message(const ESPNowMessage *message)
 
 #ifdef DEBUG
     Serial.printf(
-        "[ESP-NOW] SEND:\n\tTarget: %s\n\tFWD BLE: %d\n\tData: %s\n",
+        "[ESP-NOW] SEND:\n\tTarget: %s\n\tCMD ID: %d\n\tFWD BLE: %d\n\tData: %s\n",
         target_str,
+        message->cmd_id,
         message->fwd_ble,
         message->data);
 #endif
