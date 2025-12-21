@@ -25,10 +25,11 @@ def notification_handler(sender, data):
     global ActLed
 
     # print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] From {sender} -> {data.decode(errors='ignore')}")
-    m = data.decode(errors='ignore').strip("\x00")
-    print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] {m}")
+    data = data.rstrip(b"\x00")
+    m = data.decode(errors='ignore')
+    print(f"[NOTIFICATION] [{(time.time() - LastSend) * 100:.2f} ms] {data}")
 
-    if m.split(" ")[0] == "BPRS":
+    if m.split(" ")[0][1:] == "BPRS":
         led = b""
         if LastBtnClk < int(m.split(" ")[2]):
             LastBtnClk = int(m.split(" ")[2])
@@ -47,7 +48,7 @@ def notification_handler(sender, data):
         
 
 async def send_packet(pkt):
-    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFF" + pkt, response=False)
+    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFF\x00" + pkt, response=False)
 
 
 async def main():
@@ -89,7 +90,7 @@ async def main():
     print("\t0 PING")
 
     await asyncio.sleep(0.25)
-    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x08\x08\x00\x00\x00\x08"*4, response=False)
+    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFF\x01SLED " + b"\x08\x08\x00\x00\x00\x08"*4, response=False)
     # await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + b"\x00\x08\x08"*8, response=False)
     await asyncio.sleep(0.25)
 
@@ -101,15 +102,15 @@ async def main():
             leds[i*3 + 0] = 255
             leds[i*3 + 1] = 0
             leds[i*3 + 2] = 0
-            await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFSLED " + leds, response=False)
+            await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFF\x02SLED " + leds, response=False)
             await asyncio.sleep(0.05)
     """
 
     print("ACLK")
-    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFACLK", response=False)
+    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFF\x03ACLK", response=False)
     LastSend = time.time()
     await asyncio.sleep(1)
-    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFFGCLK", response=False)
+    await client.write_gatt_char(CHAR_UUID, b"\xFF\xFF\xFF\xFF\xFF\xFF\x04GCLK", response=False)
     LastSend = time.time()
     await asyncio.sleep(1)
 
@@ -123,7 +124,7 @@ async def main():
             m = MAC[0]
             msg = inp
 
-        msg_b = m + msg.encode()
+        msg_b = m + b"\x05" + msg.encode()
         print(f"SEND: {msg_b}")
         await client.write_gatt_char(CHAR_UUID, msg_b, response=False)
         LastSend = time.time()
