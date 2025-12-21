@@ -41,7 +41,8 @@ All packets sent from the computer follow the same general PDU:
 ```mermaid
 packet
 0-6: "Destination adress"
-7-31: "Command (separated from data by a space, variable length)"
+7: "ID"
+8-31: "Command (separated from data by a space, variable length)"
 32-63: "Data (Optional, variable length)"
 64-95: "Padding (Optional, total length is 240 bytes)"
 ```
@@ -49,10 +50,19 @@ packet
 Data are raw bytes.
 Broadcast address is `\xFF\xFF\xFF\xFF\xFF\xFF` (or more human-readable `ff:ff:ff:ff:ff:ff`).
 
+ID refers to a command ID, used for polling responses in backend.
+
 ### Gateway to computer communication
 
-Communication from gateway to computer isn't normalized.
-Max size is 247 bytes.
+Communication from gateway to computer isn't totally normalized.
+
+```mermaid
+packet
+1: "ID"
+2-31: "Data (not normalized, variable length)"
+```
+
+Max data size is 240 bytes.
 
 It is made from `data` field of a `ESPNowMessage` where `fwd_ble` is `1`.
 
@@ -148,7 +158,7 @@ Command used to ping any ESP.
 Response contains the target MAC address (in this example : `AA:BB:CC:DD:EE:FF`).
 
 > Command : `PING`
-> Response : `PONG AA:BB:CC:DD:EE:FF`
+> Response : `PING AA:BB:CC:DD:EE:FF`
 
 #### Get clock
 
