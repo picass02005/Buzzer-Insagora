@@ -58,8 +58,8 @@ Communication from gateway to computer isn't totally normalized.
 
 ```mermaid
 packet
-1: "ID"
-2-31: "Data (not normalized, variable length)"
+0: "ID"
+1-31: "Data (not normalized, variable length)"
 ```
 
 Max data size is 240 bytes.
