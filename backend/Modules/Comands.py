@@ -94,3 +94,20 @@ class Commands:
         )
 
         return len(self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "ACLK")) == 1
+
+    async def get_led_number(self, target_mac: bytes | str = None) -> List[RecvObject]:
+        """
+        Get number of LED installed on a buzzer
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: A list of responses
+        """
+
+        cmd_id = await self.bt_comm.send_command(command="GLED", target_mac=target_mac)
+
+        await self.bt_comm.recv_poll.wait_for_polling(
+            cmd_id,
+            "GLED",
+            is_broadcast=self.bt_comm.is_broadcast(target_mac)
+        )
+
+        return self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "GLED")

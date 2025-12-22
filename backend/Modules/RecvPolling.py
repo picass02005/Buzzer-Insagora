@@ -147,7 +147,7 @@ class RecvObject:
 
     cmd_id: int      # The command ID
     cmd: str         # The command
-    args: List[str]  # All arguments from a command
+    data: List[str]  # All data from a command
 
     raw: bytes       # The raw message
 
@@ -155,11 +155,11 @@ class RecvObject:
         self.timestamp = timestamp
         self.cmd_id = int(raw[0])
         self.cmd = raw.split(b" ")[0][1:].decode(errors="ignore")
-        self.args = raw.decode(errors="ignore").split(" ")[1:]
+        self.data = raw.decode(errors="ignore").split(" ")[1:]
         self.raw = raw
 
     def __str__(self) -> str:
-        return f"<RecvObject ts={self.timestamp} cmd_id={self.cmd_id} cmd={self.cmd} args={self.args}>"
+        return f"<RecvObject ts={self.timestamp} cmd_id={self.cmd_id} cmd={self.cmd} data={self.data}>"
 
     def __repr__(self) -> str:
         return self.__str__()
