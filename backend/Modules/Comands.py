@@ -35,3 +35,20 @@ class Commands:
         )
 
         return self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "PING")
+
+    async def get_clock(self, target_mac: bytes | str = None) -> List[RecvObject]:
+        """
+        Get the clock value and return responses
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: A list of responses
+        """
+
+        cmd_id = await self.bt_comm.send_command(command="GCLK", target_mac=target_mac)
+
+        await self.bt_comm.recv_poll.wait_for_polling(
+            cmd_id,
+            "GCLK",
+            is_broadcast=self.bt_comm.is_broadcast(target_mac)
+        )
+
+        return self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "GCLK")

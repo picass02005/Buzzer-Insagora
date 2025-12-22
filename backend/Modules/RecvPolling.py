@@ -158,5 +158,8 @@ class RecvObject:
         self.args = raw.decode(errors="ignore").split(" ")[1:]
         self.raw = raw
 
-    def __str__(self):
-        return f"<RecvObject ts={self.timestamp} cmd_id={self.cmd_id} cmd={self.cmd} raw={self.raw}>"
+    def __str__(self) -> str:
+        return f"<RecvObject ts={self.timestamp} cmd_id={self.cmd_id} cmd={self.cmd} args={self.args}>"
+
+    def __repr__(self) -> str:
+        return self.__str__()
