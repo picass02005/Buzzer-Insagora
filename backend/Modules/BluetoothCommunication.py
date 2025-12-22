@@ -6,10 +6,12 @@ import asyncio
 import json
 import logging
 import pathlib
+import time
 
 from bleak import BleakClient, BleakScanner, BleakGATTCharacteristic
 
 from backend.Modules.Comands import Commands
+from backend.Modules.RecvPolling import RecvPoll, RecvObject
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,8 @@ class BluetoothCommunication:
         self.client: None | BleakClient = None
 
         self.commands: Commands = Commands(self)
+
+        self.recv_poll = RecvPoll()
 
         self.__cmd_id: int = 0
         self.__cmd_id_lock: asyncio.Lock = asyncio.Lock()
@@ -82,9 +86,12 @@ class BluetoothCommunication:
 
         await self.client.connect()
 
-        await asyncio.sleep(0.5)
+        i = 0
+        while i < 20 and self.client is None:
+            await asyncio.sleep(0.1)
+            i += 1
 
-        if not self.client.is_connected:
+        if self.client is None or not self.client.is_connected:
             logger.error("Couldn't connect to buzzer")
             return False
 
@@ -176,12 +183,21 @@ class BluetoothCommunication:
         elif isinstance(target_mac, str):
             assert len(target_mac) == 17, "Target MAC should be in the form 00:11:22:33:44:55 when using str"
 
-            target_mac_format = b"".join([bytes(int(i, 16)) for i in target_mac.split(":")])
+            target_mac_format = b"".join([int(i, 16).to_bytes(signed=False) for i in target_mac.split(":")])
 
         else:
             raise TypeError("Target mac should be either None, bytes or a string")
 
         return target_mac_format
+
+    def is_broadcast(self, mac_addr: bytes | str | None) -> bool:
+        """
+        Check if a MAC address is a broadcast address or no
+        :param mac_addr: The MAC address to test
+        :return: True if MAC address is broadcast
+        """
+
+        return self.target_mac_formatter(mac_addr) == b"\xff\xff\xff\xff\xff\xff"
 
 
 
@@ -196,8 +212,7 @@ class BluetoothCommunication:
 
         self.client = None
 
-    @staticmethod
-    async def on_notification(sender: int | BleakGATTCharacteristic, data: bytearray) -> None:
+    async def on_notification(self, sender: int | BleakGATTCharacteristic, data: bytearray) -> None:
         """
         Callback invoked when a buzzer send a packet to computer
         :param sender: The sender who sent the packet
@@ -209,4 +224,10 @@ class BluetoothCommunication:
 
         logger.debug(f"RECV: {sender} - {data_format}")
 
+        recv_obj = RecvObject(int(time.time()), data_format)
+        self.recv_poll.insert_object(recv_obj)
+
+        logger.info(f"Added {str(recv_obj)} into poll")
+
     # TODO: add each commands
+    # TODO: add BPRS callback

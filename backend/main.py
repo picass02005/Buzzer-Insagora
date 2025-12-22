@@ -25,12 +25,11 @@ async def main() -> None:
 
     await bt_comm.send_command("ACLK")
     await asyncio.sleep(0.5)
-    await bt_comm.send_command("SLED", b"\x00\x0f\x0f\x0f\x0f\x00"*4)
+    await bt_comm.send_command("SLED", b"\x0f\x00\x00\x0f\x0f\x00\x00\x0f\x00\x00\x0f\x0f\x00\x00\x0f\x0f\x00\x0f\x0f\x00\x00")
     await bt_comm.send_command("GCLK")
 
-    await bt_comm.commands.ping()
-    await bt_comm.commands.ping()
-    await bt_comm.commands.ping()
+    print(await bt_comm.commands.ping())
+    print(await bt_comm.commands.ping(target_mac="78:1C:3C:2D:57:94"))
 
     while True:
         await asyncio.sleep(1)
