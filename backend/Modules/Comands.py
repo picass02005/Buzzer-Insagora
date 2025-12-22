@@ -2,6 +2,7 @@
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
+
 from typing import TYPE_CHECKING, List
 
 from backend.Modules.RecvPolling import RecvObject
