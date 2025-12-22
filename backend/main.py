@@ -23,7 +23,7 @@ async def main() -> None:
 
     await bt_comm.connect_oneshot()
 
-    await bt_comm.send_command("ACLK")
+    print(await bt_comm.commands.automatic_set_clock())
     await asyncio.sleep(0.5)
     await bt_comm.send_command("SLED", b"\x0f\x00\x00\x0f\x0f\x00\x00\x0f\x00\x00\x0f\x0f\x00\x00\x0f\x0f\x00\x0f\x0f\x00\x00")
 

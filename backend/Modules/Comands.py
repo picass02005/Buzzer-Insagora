@@ -52,3 +52,45 @@ class Commands:
         )
 
         return self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "GCLK")
+
+    async def reset_clock(self, target_mac: bytes | str = None) -> None:
+        """
+        Reset the clock internal value
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: None
+        """
+
+        await self.bt_comm.send_command(command="RCLK", target_mac=target_mac)
+
+    async def set_clock(self, new_clock: int, target_mac: bytes | str = None) -> None:
+        """
+        Set the clock internal value to new_clock if it is smaller than actual internal clock
+        :param new_clock: The new clock value to set
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: None
+        """
+
+        i_new_clock = int(new_clock)
+
+        assert 0 <= i_new_clock <= 9223372036854775807, "Clock must be in the range 0 - MAX_INT64"
+
+        await self.bt_comm.send_command(command=f"SCLK {i_new_clock}", target_mac=target_mac)
+
+
+    async def automatic_set_clock(self, target_mac: bytes | str = None) -> bool:
+        """
+        Automatically synchronize all buzzer clocks
+        For more information, check ACLK command in onboard documentation
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: A boolean indicating if it worked
+        """
+
+        cmd_id = await self.bt_comm.send_command(command="ACLK", target_mac=target_mac)
+
+        await self.bt_comm.recv_poll.wait_for_polling(
+            cmd_id,
+            "ACLK",
+            is_broadcast=False  # Even if this command is made by broadcast, only master will respond
+        )
+
+        return len(self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "ACLK")) == 1
