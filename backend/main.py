@@ -14,15 +14,16 @@ logging.basicConfig(
     level=logging.DEBUG,  # TODO: Set to INFO for prod
 )
 
+
 async def main() -> None:
-    """
-    Main event loop for asyncio
-    :return: None
+    """Runs the main asyncio event loop.
+
+    This is the entry point for the asynchronous program.
     """
 
     bt_comm = BluetoothCommunication()
 
-    await bt_comm.connect_oneshot()
+    await bt_comm.connect()
 
     print(await bt_comm.commands.automatic_set_clock())
 

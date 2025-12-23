@@ -12,17 +12,33 @@ import time
 from bleak import BleakClient, BleakScanner, BleakGATTCharacteristic
 
 from backend.Modules.Comands import Commands
-from backend.Modules.RecvPolling import RecvPoll, RecvObject
+from backend.Modules.RecvPool import RecvPool, RecvObject
 
 logger = logging.getLogger(__name__)
 
 
 class BluetoothCommunication:
-    """
-    Class used to represent a BLE communication with a buzzer
+    """Handles communication with buzzers over BLE.
+
+    Provides methods to connect, send commands, and receive packets from BLE buzzers.
+
+    Attributes:
+        SERVICE_UUID (str): UUID of the BLE service used by buzzers.
+        CHARACTERISTIC_UUID (str): UUID of the BLE service used by buzzers.
+        TARGET_NAME (str): Name of the BLE device to connect to.
+        client (BleakClient or None): BLE client instance when connected, None otherwise.
+        commands (Commands): Commands object for sending commands to buzzers.
+        recv_pool (RecvPool): Pool for storing received packets.
+        __cmd_id (int): Command ID counter (0–255) for outgoing commands.
+        __cmd_id_lock (asyncio.Lock): Lock to prevent race conditions when incrementing __cmd_id.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initializes a BluetoothCommunication instance.
+
+        Loads configuration from `backend-config.json` and sets attributes accordingly.
+        """
+
         self.SERVICE_UUID: str = ""
         self.CHARACTERISTIC_UUID: str = ""
         self.TARGET_NAME: str = ""
@@ -31,24 +47,23 @@ class BluetoothCommunication:
 
         self.commands: Commands = Commands(self)
 
-        self.recv_poll = RecvPoll()
+        self.recv_pool: RecvPool = RecvPool()
 
         self.__cmd_id: int = 0
         self.__cmd_id_lock: asyncio.Lock = asyncio.Lock()
 
         self.__load_config()
-    
 
     def __load_config(self) -> None:
-        """
-        Load configuration from `backend-config.json` into class attributes
-        :raise ValueError: If config is malformed
-        :return: None
+        """Loads configuration from `backend-config.json` into class attributes.
+
+        Raises:
+            ValueError: If any required key is missing in the configuration.
         """
 
         with open(f"{pathlib.Path(__file__).resolve().parent.parent}/backend-config.json", "r") as f:
             config = json.loads(f.read())
-        
+
         for i in ["Service_UUID", "Characteristic_UUID", "BT_target_name"]:
             if i not in config.keys():
                 raise ValueError(f"Value {i} not defined in backend-config")
@@ -56,24 +71,27 @@ class BluetoothCommunication:
         self.SERVICE_UUID = config["Service_UUID"]
         self.CHARACTERISTIC_UUID = config["Characteristic_UUID"]
         self.TARGET_NAME = config["BT_target_name"]
-    
 
-    async def connect_oneshot(self) -> bool:
-        """
-        Tries to connect to a buzzer
-        :return: True if connection is successful
+    async def connect(self) -> bool:
+        """Attempts to connect to a buzzer via BLE.
+
+        Discovers nearby devices, selects the target by name, and establishes a BLE connection.
+        Also attaches a notification handler to the buzzer characteristic.
+
+        Returns:
+            bool: True if the connection is successful, False otherwise.
         """
 
         logger.info("Discovering BLE devices...")
 
         devices = await BleakScanner.discover(timeout=5.0)
-    
+
         target = None
         for d in devices:
             logger.debug(f"Discovered device : {d.name} - {d.address}")
             if d.name == self.TARGET_NAME:
                 target = d
-        
+
         if target is None:
             logger.error("Buzzer not found")
             return False
@@ -105,17 +123,26 @@ class BluetoothCommunication:
 
         return True
 
-
     async def send_command(self, command: bytes | str, args: bytes | str = b"", target_mac: bytes | str = None) -> int:
-        """
-        Send a command to buzzer(s)
-        :param command: The command to send
-        :param args: If needed, arguments for the command to send (in raw format)
-        :param target_mac: The MAC address to target, by default, perform a broadcast
-                           Accepted format are b"\x00\x11\x22\x33\x44\x55" or "00:11:22:33:44:55"
-        :raises AssertionError: One assertion was not successful
-        :raises TypeError: One argument wasn't an accepted type
-        :return: Return sent command id
+        """Sends a command to one or more buzzers.
+
+        Formats the command and arguments, applies target MAC addressing (broadcast if None),
+        and writes the command to the BLE characteristic.
+
+        Args:
+            command (bytes | str): Command to send.
+            args (bytes | str, optional): Arguments for the command, defaults to empty bytes.
+            target_mac (bytes | str | None, optional): Target MAC address for the command.
+                Defaults to broadcast (None). Acceptable formats:
+                - b"\x00\x11\x22\x33\x44\x55"
+                - "00:11:22:33:44:55"
+
+        Raises:
+            AssertionError: If MAC format or value is invalid.
+            TypeError: If `command` or `args` are not of type bytes or str.
+
+        Returns:
+            int: ID of the sent command.
         """
 
         target_mac_format = self.target_mac_formatter(target_mac)
@@ -164,12 +191,17 @@ class BluetoothCommunication:
 
     @staticmethod
     def target_mac_formatter(target_mac: bytes | str | None) -> bytes:
-        """
-        Method used to convert a target MAC address to proper format (in bytes)
-        :param target_mac: The target MAC to format
-        :raises AssertionError: One assertion was not successful
-        :raises TypeError: One argument wasn't an accepted type
-        :return: The formatted target MAC
+        """Formats a target MAC address into bytes suitable for BLE communication.
+
+        Args:
+            target_mac (bytes | str | None): Target MAC address. If None, uses broadcast.
+
+        Raises:
+            AssertionError: If the MAC string or bytes format is invalid.
+            TypeError: If the type of `target_mac` is not supported.
+
+        Returns:
+            bytes: MAC address formatted as 6 bytes.
         """
 
         if target_mac is None:
@@ -192,21 +224,22 @@ class BluetoothCommunication:
         return target_mac_format
 
     def is_broadcast(self, mac_addr: bytes | str | None) -> bool:
-        """
-        Check if a MAC address is a broadcast address or no
-        :param mac_addr: The MAC address to test
-        :return: True if MAC address is broadcast
+        """Checks if a MAC address represents a broadcast address.
+
+        Args:
+            mac_addr (bytes | str | None): MAC address to check.
+
+        Returns:
+            bool: True if the MAC address is broadcast, False otherwise.
         """
 
         return self.target_mac_formatter(mac_addr) == b"\xff\xff\xff\xff\xff\xff"
 
-
-
     def on_disconnect(self, client: BleakClient) -> None:
-        """
-        Callback invoked when buzzer disconnect
-        :param client: The client who got disconnected
-        :return: None
+        """Callback invoked when the buzzer disconnects.
+
+        Args:
+            client (BleakClient): BLE client that got disconnected.
         """
 
         logger.error("Client disconnected [TODO: RECONNECT]")
@@ -214,11 +247,13 @@ class BluetoothCommunication:
         self.client = None
 
     async def on_notification(self, sender: int | BleakGATTCharacteristic, data: bytearray) -> None:
-        """
-        Callback invoked when a buzzer send a packet to computer
-        :param sender: The sender who sent the packet
-        :param data: The data sent as bytearray
-        :return: None
+        """Callback invoked when a buzzer sends a packet to the computer.
+
+        Parses the received data, creates a `RecvObject`, and inserts it into the `recv_pool`.
+
+        Args:
+            sender (int | BleakGATTCharacteristic): Sender of the packet.
+            data (bytearray): Data received from the buzzer.
         """
 
         data_format = bytes(data).rstrip(b"\x00")
@@ -226,7 +261,7 @@ class BluetoothCommunication:
         logger.debug(f"RECV: {sender} - {data_format}")
 
         recv_obj = RecvObject(int(time.time()), data_format)
-        self.recv_poll.insert_object(recv_obj)
+        self.recv_pool.insert_object(recv_obj)
 
         logger.info(f"Added {str(recv_obj)} into poll")
 
