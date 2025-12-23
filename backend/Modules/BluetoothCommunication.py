@@ -230,5 +230,4 @@ class BluetoothCommunication:
 
         logger.info(f"Added {str(recv_obj)} into poll")
 
-    # TODO: add each commands
     # TODO: add BPRS callback
