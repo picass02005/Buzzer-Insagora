@@ -66,6 +66,20 @@ class RecvPoll:
 
         self.__clear_garbage()
 
+    def clear_by_command(self, command_name: str) -> None:
+        """
+        Clear all commands with a specified command_name from pool
+        :param command_name: The command name to filter delete
+        :return: None
+        """
+
+        self.__sql.execute(
+            "REMOVE FROM poll WHERE cmd=?;",
+            (command_name,)
+        )
+
+        self.__clear_garbage()
+
     def get_object_by_cmd(self, cmd: str) -> List[RecvObject]:
         """
         Get an object from poll by a command
