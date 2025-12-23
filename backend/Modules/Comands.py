@@ -122,3 +122,12 @@ class Commands:
         """
 
         await self.bt_comm.send_command(command=b"SLED", args=bytes(leds), target_mac=target_mac)
+
+    async def clear_leds(self, target_mac: bytes | str = None) -> None:
+        """
+        Clears all LEDs on a buzzer
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: None
+        """
+
+        await self.bt_comm.send_command(command=b"CLED", target_mac=target_mac)
