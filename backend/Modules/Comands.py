@@ -5,6 +5,7 @@
 
 from typing import TYPE_CHECKING, List
 
+from backend.Modules.LEDManager import LEDs
 from backend.Modules.RecvPolling import RecvObject
 
 if TYPE_CHECKING:
@@ -26,7 +27,7 @@ class Commands:
         :return: A list of responses
         """
 
-        cmd_id = await self.bt_comm.send_command(command="PING", target_mac=target_mac)
+        cmd_id = await self.bt_comm.send_command(command=b"PING", target_mac=target_mac)
 
         await self.bt_comm.recv_poll.wait_for_polling(
             cmd_id,
@@ -43,7 +44,7 @@ class Commands:
         :return: A list of responses
         """
 
-        cmd_id = await self.bt_comm.send_command(command="GCLK", target_mac=target_mac)
+        cmd_id = await self.bt_comm.send_command(command=b"GCLK", target_mac=target_mac)
 
         await self.bt_comm.recv_poll.wait_for_polling(
             cmd_id,
@@ -60,7 +61,7 @@ class Commands:
         :return: None
         """
 
-        await self.bt_comm.send_command(command="RCLK", target_mac=target_mac)
+        await self.bt_comm.send_command(command=b"RCLK", target_mac=target_mac)
 
     async def set_clock(self, new_clock: int, target_mac: bytes | str = None) -> None:
         """
@@ -74,7 +75,7 @@ class Commands:
 
         assert 0 <= i_new_clock <= 9223372036854775807, "Clock must be in the range 0 - MAX_INT64"
 
-        await self.bt_comm.send_command(command=f"SCLK {i_new_clock}", target_mac=target_mac)
+        await self.bt_comm.send_command(command=b"SCLK", args=str(i_new_clock), target_mac=target_mac)
 
 
     async def automatic_set_clock(self, target_mac: bytes | str = None) -> bool:
@@ -85,7 +86,7 @@ class Commands:
         :return: A boolean indicating if it worked
         """
 
-        cmd_id = await self.bt_comm.send_command(command="ACLK", target_mac=target_mac)
+        cmd_id = await self.bt_comm.send_command(command=b"ACLK", target_mac=target_mac)
 
         await self.bt_comm.recv_poll.wait_for_polling(
             cmd_id,
@@ -102,7 +103,7 @@ class Commands:
         :return: A list of responses
         """
 
-        cmd_id = await self.bt_comm.send_command(command="GLED", target_mac=target_mac)
+        cmd_id = await self.bt_comm.send_command(command=b"GLED", target_mac=target_mac)
 
         await self.bt_comm.recv_poll.wait_for_polling(
             cmd_id,
@@ -111,3 +112,13 @@ class Commands:
         )
 
         return self.bt_comm.recv_poll.get_object_by_cmd_id_and_cmd(cmd_id, "GLED")
+
+    async def set_leds(self, leds: LEDs, target_mac: bytes | str = None) -> None:
+        """
+        Set LEDs colors on a buzzer
+        :param leds: The colors for each LED on the buzzer
+        :param target_mac: The MAC address to target, by default, it is the broadcast address
+        :return: None
+        """
+
+        await self.bt_comm.send_command(command=b"SLED", args=bytes(leds), target_mac=target_mac)

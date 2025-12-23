@@ -8,6 +8,7 @@ import asyncio
 import logging
 
 from backend.Modules.BluetoothCommunication import BluetoothCommunication
+from backend.Modules.LEDManager import LEDs, Color
 
 logging.basicConfig(
     level=logging.DEBUG,  # TODO: Set to INFO for prod
@@ -24,10 +25,18 @@ async def main() -> None:
     await bt_comm.connect_oneshot()
 
     print(await bt_comm.commands.automatic_set_clock())
-    await asyncio.sleep(0.5)
-    await bt_comm.send_command("SLED", b"\x0f\x00\x00\x0f\x0f\x00\x00\x0f\x00\x00\x0f\x0f\x00\x00\x0f\x0f\x00\x0f\x0f\x00\x00")
 
-    await asyncio.sleep(0.5)
+    l = LEDs(8)
+    l.leds[0] = Color(15, 0, 0)
+    l.leds[1] = Color(15, 15, 0)
+    l.leds[2] = Color(0, 15, 0)
+    l.leds[3] = Color(0, 15, 15)
+    l.leds[4] = Color(0, 0, 15)
+    l.leds[5] = Color(15, 0, 15)
+    l.leds[6] = Color(15, 0, 0)
+    l.leds[7] = Color(15, 15, 15)
+
+    await bt_comm.commands.set_leds(l)
 
     print(await bt_comm.commands.get_clock())
 
