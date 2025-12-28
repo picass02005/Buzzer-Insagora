@@ -126,7 +126,12 @@ class BluetoothCommunication:
             return False
 
         logger.debug("Attaching notifications handler")
-        await self.client.start_notify(self.CHARACTERISTIC_UUID, self.on_notification)
+        try:
+            await self.client.start_notify(self.CHARACTERISTIC_UUID, self.on_notification)
+
+        except OSError:
+            logging.error("Couldn't start notifying")
+            return False
 
         logger.info("Buzzer connected")
 

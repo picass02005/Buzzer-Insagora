@@ -1,3 +1,8 @@
+# Copyright (c) 2025 picasso2005 <clementduran0@gmail.com>
+#
+# This software is released under the MIT License.
+# https://opensource.org/licenses/MIT
+
 import json
 import logging
 import pathlib
@@ -73,6 +78,7 @@ class ServeGUI:
 
         config = Config()
         config.bind = self.__bind
-        config.shutdown_timeout = 0.25
+        config.shutdown_timeout = 1
+        config.install_signal_handlers = False
 
         await serve(self.quart_app, config)
