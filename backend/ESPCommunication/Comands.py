@@ -5,11 +5,11 @@
 
 from typing import TYPE_CHECKING, List
 
-from backend.Modules.LEDManager import LEDs
-from backend.Modules.RecvPool import RecvObject
+from backend.ESPCommunication.LEDManager import LEDs
+from backend.ESPCommunication.RecvPool import RecvObject
 
 if TYPE_CHECKING:
-    from backend.Modules.BluetoothCommunication import BluetoothCommunication
+    from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 
 
 class Commands:

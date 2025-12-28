@@ -11,8 +11,9 @@ import time
 
 from bleak import BleakClient, BleakScanner, BleakGATTCharacteristic
 
-from backend.Modules.Comands import Commands
-from backend.Modules.RecvPool import RecvPool, RecvObject
+from backend.ESPCommunication.ButtonCallback import ButtonCallback
+from backend.ESPCommunication.Comands import Commands
+from backend.ESPCommunication.RecvPool import RecvPool, RecvObject
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ class BluetoothCommunication:
         TARGET_NAME (str): Name of the BLE device to connect to.
         client (BleakClient or None): BLE client instance when connected, None otherwise.
         commands (Commands): Commands object for sending commands to buzzers.
+        but_callback (ButtonCallback): Callback handler for button press events received from buzzers.
+            Responsible for processing and deduplicating button press notifications.
         recv_pool (RecvPool): Pool for storing received packets.
         __cmd_id (int): Command ID counter (0–255) for outgoing commands.
         __cmd_id_lock (asyncio.Lock): Lock to prevent race conditions when incrementing __cmd_id.
@@ -46,6 +49,7 @@ class BluetoothCommunication:
         self.client: None | BleakClient = None
 
         self.commands: Commands = Commands(self)
+        self.but_callback: ButtonCallback = ButtonCallback(self)
 
         self.recv_pool: RecvPool = RecvPool()
 
@@ -258,11 +262,12 @@ class BluetoothCommunication:
 
         data_format = bytes(data).rstrip(b"\x00")
 
-        logger.debug(f"RECV: {sender} - {data_format}")
-
         recv_obj = RecvObject(int(time.time()), data_format)
         self.recv_pool.insert_object(recv_obj)
 
-        logger.info(f"Added {str(recv_obj)} into poll")
+        logger.debug(f"Added {str(recv_obj)} into poll")
+
+        if recv_obj.cmd == "BPRS":
+            self.but_callback.bprs_callback_maker()
 
     # TODO: add BPRS callback

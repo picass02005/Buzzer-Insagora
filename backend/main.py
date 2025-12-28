@@ -7,8 +7,8 @@
 import asyncio
 import logging
 
-from backend.Modules.BluetoothCommunication import BluetoothCommunication
-from backend.Modules.LEDManager import LEDs, Color
+from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
+from backend.ESPCommunication.LEDManager import LEDs, Color
 
 logging.basicConfig(
     level=logging.DEBUG,  # TODO: Set to INFO for prod

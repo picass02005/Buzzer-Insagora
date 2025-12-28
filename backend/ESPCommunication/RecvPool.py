@@ -32,7 +32,7 @@ class RecvPool:
             "   cmd_id INTEGER NOT NULL,"
             "   cmd TEXT NOT NULL,"
             "   raw BLOB NOT NULL,"
-            "   UNIQUE(ts, cmd_id, cmd, raw)"
+            "   UNIQUE(cmd_id, cmd, raw)"
             ");"
         )
 
@@ -227,3 +227,23 @@ class RecvObject:
         """
 
         return self.__str__()
+
+    def __eq__(self, other: object):
+        """Check if two RecvObject instances are equal.
+
+        Equality is based on the `raw` attribute.
+
+        Args:
+            other (object): The object to compare with.
+
+        Returns:
+            bool: True if `other` is a `RecvObject` and has the same `raw` value, False otherwise.
+
+        Raises:
+            TypeError: If `other` is not a `RecvObject`.
+        """
+
+        if not isinstance(other, RecvObject):
+            raise TypeError("Left hand object isn't a RecvObject")
+
+        return self.raw == other.raw
