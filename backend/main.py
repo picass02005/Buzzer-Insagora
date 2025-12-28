@@ -9,6 +9,7 @@ import logging
 
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.ESPCommunication.LEDManager import LEDs, Color
+from backend.GUI.app import ServeGUI
 
 logging.basicConfig(
     level=logging.DEBUG,  # TODO: Set to INFO for prod
@@ -20,6 +21,9 @@ async def main() -> None:
 
     This is the entry point for the asynchronous program.
     """
+
+    gui = ServeGUI()
+    asyncio.create_task(gui.run())
 
     bt_comm = BluetoothCommunication()
 

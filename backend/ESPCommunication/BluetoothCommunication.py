@@ -68,13 +68,16 @@ class BluetoothCommunication:
         with open(f"{pathlib.Path(__file__).resolve().parent.parent}/backend-config.json", "r") as f:
             config = json.loads(f.read())
 
-        for i in ["Service_UUID", "Characteristic_UUID", "BT_target_name"]:
-            if i not in config.keys():
-                raise ValueError(f"Value {i} not defined in backend-config")
+        if "Buzzers" not in config.keys():
+            raise ValueError(f"Value Buzzers not defined in backend-config")
 
-        self.SERVICE_UUID = config["Service_UUID"]
-        self.CHARACTERISTIC_UUID = config["Characteristic_UUID"]
-        self.TARGET_NAME = config["BT_target_name"]
+        for i in ["Service_UUID", "Characteristic_UUID", "BT_target_name"]:
+            if i not in config["Buzzers"].keys():
+                raise ValueError(f"Value Buzzers/{i} not defined in backend-config")
+
+        self.SERVICE_UUID = config["Buzzers"]["Service_UUID"]
+        self.CHARACTERISTIC_UUID = config["Buzzers"]["Characteristic_UUID"]
+        self.TARGET_NAME = config["Buzzers"]["BT_target_name"]
 
     async def connect(self) -> bool:
         """Attempts to connect to a buzzer via BLE.
