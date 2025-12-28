@@ -27,7 +27,7 @@ async def main() -> None:
     gui = ServeGUI(bt_comm)
     asyncio.create_task(gui.run())
 
-    await bt_comm.connect()
+    await bt_comm.connect_until_complete()
 
     print(await bt_comm.commands.automatic_set_clock())
 

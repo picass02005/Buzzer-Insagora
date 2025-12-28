@@ -79,14 +79,18 @@ class BluetoothCommunication:
         self.CHARACTERISTIC_UUID = config["Buzzers"]["Characteristic_UUID"]
         self.TARGET_NAME = config["Buzzers"]["BT_target_name"]
 
-    async def connect(self) -> bool:
-        """Attempts to connect to a buzzer via BLE.
+    async def connect_oneshot(self) -> bool:
+        """Attempts to connect to a single buzzer via BLE.
 
-        Discovers nearby devices, selects the target by name, and establishes a BLE connection.
-        Also attaches a notification handler to the buzzer characteristic.
+        This method performs the following steps:
+        1. Scans for nearby BLE devices (timeout: 5 seconds).
+        2. Selects the target device by matching its `TARGET_NAME`.
+        3. Establishes a BLE connection using `BleakClient`.
+        4. Attaches a notification handler to the buzzer characteristic.
+        5. Waits briefly to ensure the Bluetooth stack is initialized.
 
         Returns:
-            bool: True if the connection is successful, False otherwise.
+            bool: `True` if the connection was successful, `False` otherwise.
         """
 
         logger.info("Discovering BLE devices...")
@@ -129,6 +133,21 @@ class BluetoothCommunication:
         await asyncio.sleep(0.1)  # Ensure BT stack is properly initialized
 
         return True
+
+    async def connect_until_complete(self) -> None:
+        """Continuously attempts to connect to a buzzer until successful.
+
+        This method repeatedly calls `connect_oneshot()` every 5 seconds until
+        a connection is established. Useful for ensuring the system eventually
+        connects even if the target buzzer is temporarily unavailable.
+        """
+
+        logging.info("Trying to connect to buzzers...")
+
+        while not await self.connect_oneshot():
+            await asyncio.sleep(5)
+
+        logging.info("Successfully connected")
 
     async def send_command(self, command: bytes | str, args: bytes | str = b"", target_mac: bytes | str = None) -> int:
         """Sends a command to one or more buzzers.
@@ -249,9 +268,11 @@ class BluetoothCommunication:
             client (BleakClient): BLE client that got disconnected.
         """
 
-        logger.error("Client disconnected [TODO: RECONNECT]")
+        logger.error("Client disconnected")
 
         self.client = None
+
+        asyncio.create_task(self.connect_until_complete())
 
     async def on_notification(self, sender: int | BleakGATTCharacteristic, data: bytearray) -> None:
         """Callback invoked when a buzzer sends a packet to the computer.

@@ -49,4 +49,6 @@ class Test:
         ret.update({"ping": [i.data[0] for i in await self.__bt_comm.commands.ping()]})
         ret.update({"clock": [{i.data[0]: int(i.data[1])} for i in await self.__bt_comm.commands.get_clock()]})
 
+        ret.update({"LED nb": int((await self.__bt_comm.commands.get_led_number(ret["ping"][0]))[0].data[0])})
+
         return jsonify(ret), 200
