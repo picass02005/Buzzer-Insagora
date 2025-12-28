@@ -269,5 +269,3 @@ class BluetoothCommunication:
 
         if recv_obj.cmd == "BPRS":
             self.but_callback.bprs_callback_maker()
-
-    # TODO: add BPRS callback

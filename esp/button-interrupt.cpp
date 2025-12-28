@@ -10,7 +10,7 @@
 #include "esp-now.h"
 #include "pins.h"
 
-#define INTERRUPT_PCK_SEND 3
+#define INTERRUPT_PCK_SEND 2
 #define INTERRUPT_PCK_DELAY 2
 #define INTERRUPT_TASK_DELAY 10
 

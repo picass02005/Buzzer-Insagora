@@ -46,6 +46,10 @@ async def main() -> None:
 
     print(await bt_comm.commands.get_led_number())
 
+    for i in range(10):
+        print(i, await bt_comm.but_callback.get_first_press())
+        await asyncio.sleep(1)
+
     while True:
         await asyncio.sleep(1)
 
