@@ -50,11 +50,10 @@ async def main() -> None:
         print(i, await bt_comm.but_callback.get_first_press())
         await asyncio.sleep(1)
 
-    while True:
-        await asyncio.sleep(1)
-
     # TODO: Clean CLI / small GUI with flask
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.new_event_loop()
+    loop.create_task(main())
+    loop.run_forever()
