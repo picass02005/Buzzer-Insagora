@@ -13,6 +13,7 @@ from bleak import BleakClient, BleakScanner, BleakGATTCharacteristic
 
 from backend.ESPCommunication.ButtonCallback import ButtonCallback
 from backend.ESPCommunication.Comands import Commands
+from backend.ESPCommunication.ConnectedCache import ConnectedCache
 from backend.ESPCommunication.RecvPool import RecvPool, RecvObject
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,7 @@ class BluetoothCommunication:
 
         self.commands: Commands = Commands(self)
         self.but_callback: ButtonCallback = ButtonCallback(self)
+        self.connected_cache: ConnectedCache = ConnectedCache(self)
 
         self.recv_pool: RecvPool = RecvPool()
 

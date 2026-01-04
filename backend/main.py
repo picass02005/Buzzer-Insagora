@@ -8,7 +8,6 @@ import asyncio
 import logging
 
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
-from backend.ESPCommunication.LEDManager import LEDs, Color
 from backend.GUI.ServeGUI import ServeGUI
 
 logging.basicConfig(
@@ -29,30 +28,10 @@ async def main() -> None:
 
     await bt_comm.connect_until_complete()
 
-    print(await bt_comm.commands.automatic_set_clock())
-
-    l = LEDs(8)
-    l.leds[0] = Color(15, 0, 0)
-    l.leds[1] = Color(15, 15, 0)
-    l.leds[2] = Color(0, 15, 0)
-    l.leds[3] = Color(0, 15, 15)
-    l.leds[4] = Color(0, 0, 15)
-    l.leds[5] = Color(15, 0, 15)
-    l.leds[6] = Color(15, 0, 0)
-    l.leds[7] = Color(15, 15, 15)
-
-    await bt_comm.commands.set_leds(l)
-
-    print(await bt_comm.commands.get_clock())
-
-    print(await bt_comm.commands.ping())
-    print(await bt_comm.commands.ping(target_mac="78:1C:3C:2D:57:94"))
-
-    print(await bt_comm.commands.get_led_number())
-
-    for i in range(10):
-        print(i, await bt_comm.but_callback.get_first_press())
-        await asyncio.sleep(1)
+    print(await bt_comm.connected_cache.get_connected_str())
+    print(await bt_comm.connected_cache.get_connected_str())
+    print(await bt_comm.connected_cache.get_connected_str())
+    print(await bt_comm.connected_cache.get_connected_str())
 
     # TODO: Clean CLI / small GUI with flask
 
