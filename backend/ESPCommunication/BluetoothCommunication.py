@@ -132,7 +132,7 @@ class BluetoothCommunication:
             await self.client.start_notify(self.CHARACTERISTIC_UUID, self.on_notification)
 
         except OSError:
-            logging.error("Couldn't start notifying")
+            logger.error("Couldn't start notifying")
             return False
 
         logger.info("Buzzer connected")
@@ -149,12 +149,12 @@ class BluetoothCommunication:
         connects even if the target buzzer is temporarily unavailable.
         """
 
-        logging.info("Trying to connect to buzzers...")
+        logger.info("Trying to connect to buzzers...")
 
         while not await self.connect_oneshot():
             await asyncio.sleep(5)
 
-        logging.info("Successfully connected")
+        logger.info("Successfully connected")
 
     async def send_command(self, command: bytes | str, args: bytes | str = b"", target_mac: bytes | str = None) -> int:
         """Sends a command to one or more buzzers.
@@ -300,3 +300,37 @@ class BluetoothCommunication:
 
         if recv_obj.cmd == "BPRS":
             self.but_callback.bprs_callback_maker()
+
+    @staticmethod
+    def mac_to_str(target_mac: bytes | str | None) -> str:
+        """Formats a target MAC address into a string for human readibility.
+
+        Args:
+            target_mac (bytes | str | None): Target MAC address. If None, uses broadcast.
+
+        Raises:
+            AssertionError: If the MAC string or bytes format is invalid.
+            TypeError: If the type of `target_mac` is not supported.
+
+        Returns:
+            bytes: MAC address formatted as 00:11:22:33:44:55.
+        """
+
+        if target_mac is None:
+            target_mac_format = "FF:FF:FF:FF:FF:FF"
+
+        elif isinstance(target_mac, bytes):
+            assert len(target_mac) == 6, \
+                "Target MAC should be in the form b\"\\x00\\x11\\x22\\x33\\x44\\x55\" when using bytes"
+
+            target_mac_format = ":".join([f"{i:02X}" for i in target_mac])
+
+        elif isinstance(target_mac, str):
+            assert len(target_mac) == 17, "Target MAC should be in the form 00:11:22:33:44:55 when using str"
+
+            target_mac_format = target_mac
+
+        else:
+            raise TypeError("Target mac should be either None, bytes or a string")
+
+        return target_mac_format

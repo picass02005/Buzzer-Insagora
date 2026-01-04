@@ -20,6 +20,7 @@ class Team:
     via Bluetooth to update LEDs accordingly.
 
     Attributes:
+        name (str): Team name for UI display.
         primary_color (Color): Main color used to display points.
         secondary_color (Color): Secondary color used when exceeding base
             score ranges.
@@ -32,11 +33,12 @@ class Team:
             buzzers associated with this team.
     """
 
-    def __init__(self, primary_color: Color, secondary_color: Color, bt_comm: BluetoothCommunication,
+    def __init__(self, name: str, primary_color: Color, secondary_color: Color, bt_comm: BluetoothCommunication,
                  point_limit: T_point_lim) -> None:
         """Initializes a Team instance.
 
         Args:
+            name (str): Team name for UI display.
             primary_color (Color): Main color used to display points.
             secondary_color (Color): Secondary color used when exceeding base
                 score ranges.
@@ -46,6 +48,7 @@ class Team:
                 the team.
         """
 
+        self.name: str = name
         self.primary_color: Color = primary_color
         self.secondary_color: Color = secondary_color
         self.bt_comm: BluetoothCommunication = bt_comm
@@ -177,7 +180,7 @@ class Team:
         """Updates the LEDs on all associated buzzers to display the score.
 
         The computed LED pattern is mirrored on both halves of the display,
-        the logo section is applied, and the final LED state is sent to all
+        the logo section is applied, and the final LED __state is sent to all
         associated buzzers via Bluetooth.
         """
 

@@ -39,7 +39,7 @@ class Test:
 
         self.__bt_comm: BluetoothCommunication = bt_comm
 
-        self.blueprint = Blueprint("test", __name__, url_prefix="/")
+        self.blueprint = Blueprint("test", __name__, url_prefix="/test")
 
         self.blueprint.add_url_rule("/", view_func=self.test)
 
@@ -77,19 +77,19 @@ class Test:
 
     async def state_idle(self) -> Tuple[Response, int]:
         await self.state.set_idle()
-        return jsonify({'state': 'idle'}), 200
+        return jsonify({'__state': 'idle'}), 200
 
     async def wait_press(self) -> Tuple[Response, int]:
         await self.state.wait_press()
-        return jsonify({'state': 'waiting'}), 200
+        return jsonify({'__state': 'waiting'}), 200
 
     async def confirm_press(self) -> Tuple[Response, int]:
         await self.state.confirm_press()
-        return jsonify({'state': 'confirmed'}), 200
+        return jsonify({'__state': 'confirmed'}), 200
 
     async def deny_press(self) -> Tuple[Response, int]:
         await self.state.deny_press()
-        return jsonify({'state': 'denied'}), 200
+        return jsonify({'__state': 'denied'}), 200
 
 # TODO: Team selector
 # TODO: proper interface

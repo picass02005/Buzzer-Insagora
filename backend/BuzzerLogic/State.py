@@ -18,18 +18,18 @@ logger = logging.getLogger(__name__)
 
 
 class State:
-    """Manages the current state of the game and controls LEDs for teams.
+    """Manages the current __state of the game and controls LEDs for __teams.
 
     The State class handles:
-        - Current game state (IDLE, WAIT, CHECK)
-        - LED updates for each state
-        - Detection and confirmation/denial of button presses from teams
+        - Current game __state (IDLE, WAIT, CHECK)
+        - LED updates for each __state
+        - Detection and confirmation/denial of button presses from __teams
 
     Attributes:
         teams (List[Team]): List of Team instances participating in the game.
         bt_comm (BluetoothCommunication): Bluetooth communication interface
             for interacting with team buzzers.
-        current_state (StateEnum): Current state of the system.
+        current_state (StateEnum): Current __state of the system.
         team_check (Optional[Team]): The team currently being checked for a press.
     """
 
@@ -51,7 +51,7 @@ class State:
     async def __wait_press_led(self) -> None:
         """Sets all LEDs to white to indicate the system is waiting for a press.
 
-        This is used internally when the state is WAIT.
+        This is used internally when the __state is WAIT.
         """
 
         l = LEDs(LED_NB)
@@ -113,12 +113,12 @@ class State:
             await asyncio.sleep(0.25)
 
     async def set_idle(self) -> None:
-        """Switches the system to the IDLE state and updates LEDs.
+        """Switches the system to the IDLE __state and updates LEDs.
 
         Resets `team_check` to None.
         """
 
-        logger.debug("Switching to IDLE state")
+        logger.debug("Switching to IDLE __state")
 
         self.current_state = StateEnum.IDLE
         self.team_check = None
@@ -126,9 +126,9 @@ class State:
         await self.__set_led_on_state()
 
     async def wait_press(self) -> None:
-        """Switches the system to WAIT state and waits for the first button press.
+        """Switches the system to WAIT __state and waits for the first button press.
 
-        Updates LEDs to indicate waiting. When a press is received, the state
+        Updates LEDs to indicate waiting. When a press is received, the __state
         switches to CHECK if a valid team is detected; otherwise, it returns
         to IDLE.
 
@@ -136,7 +136,7 @@ class State:
             TimeoutError: If no button press is received (depending on callback).
         """
 
-        logger.debug("Switching to WAIT state")
+        logger.debug("Switching to WAIT __state")
 
         self.current_state = StateEnum.WAIT
         await self.__set_led_on_state()
@@ -151,7 +151,7 @@ class State:
             await self.set_idle()
 
         else:
-            logger.debug("Switching to CHECK state")
+            logger.debug("Switching to CHECK __state")
 
             self.current_state = StateEnum.CHECK
             await self.__set_led_on_state()
@@ -162,7 +162,7 @@ class State:
         Updates LEDs to indicate confirmation, increments the team's point,
         and returns the system to IDLE.
 
-        Does nothing if the current state is WAIT or no team is selected.
+        Does nothing if the current __state is WAIT or no team is selected.
         """
 
         if self.current_state == StateEnum.WAIT or self.team_check is None:
@@ -182,7 +182,7 @@ class State:
 
         Flashes red on the buzzer LEDs and returns the system to IDLE.
 
-        Does nothing if the current state is WAIT or no team is selected.
+        Does nothing if the current __state is WAIT or no team is selected.
         """
 
         if self.current_state == StateEnum.WAIT or self.team_check is None:
@@ -217,14 +217,14 @@ class State:
         return None
 
     async def __set_led_on_state(self):
-        """Updates LEDs to reflect the current system state.
+        """Updates LEDs to reflect the current system __state.
 
-        - IDLE: Updates all teams’ LEDs to show their current points
+        - IDLE: Updates all __teams’ LEDs to show their current points
         - WAIT: Lights all LEDs white to indicate waiting for a press
         - CHECK: Lights LEDs for the team currently being checked
         - Other states: Clears all LEDs
         """
-        
+
         match self.current_state:
             case StateEnum.IDLE:
                 for t in self.teams:
@@ -241,7 +241,7 @@ class State:
 
 
 class StateEnum(Enum):
-    """Enumeration of possible states for the game/state machine.
+    """Enumeration of possible states for the game/__state machine.
 
     Attributes:
         IDLE (int): System is idle; no active press being handled.

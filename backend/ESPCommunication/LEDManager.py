@@ -147,6 +147,18 @@ class Color:
 
         return self
 
+    def to_str_value(self) -> str:
+        """Return the color as a 6-digit uppercase hexadecimal string.
+
+        The returned string is formatted as ``RRGGBB``, where each component
+        (red, green, blue) is encoded as a two-digit uppercase hexadecimal value.
+
+        Returns:
+            str: The color encoded as a hexadecimal RGB string (e.g. ``"FFA07A"``).
+        """
+
+        return f"{self.red:02X}{self.green:02X}{self.blue:02X}"
+
     def __str__(self) -> str:
         """Returns a human-readable string of the color.
 

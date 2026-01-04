@@ -12,7 +12,10 @@ from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from quart import Quart
 
+from backend.BuzzerLogic.State import State
+from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
+from backend.GUI.API.Status import ApiStatus
 from backend.GUI.Routes.Test import Test
 
 logger = logging.getLogger(__name__)
@@ -26,6 +29,10 @@ class ServeGUI:
 
     Attributes:
         quart_app (Quart): The Quart application instance.
+        __teams (List[Team]): Unordered list of __teams participating in the current game session.
+        __buzz_state (State): Central game __state manager responsible for tracking
+            the current game phase (IDLE, WAIT, CHECK), controlling team LEDs,
+            and handling buzzer input validation (confirmation or rejection).
         __bt_comm (BluetoothCommunication): Instance of BluetoothCommunication used by routes.
         __bind (List[str]): List of addresses and ports to bind the server to.
     """
@@ -42,6 +49,9 @@ class ServeGUI:
 
         self.__bt_comm: BluetoothCommunication = bt_comm
         self.__bind: List[str] = []
+
+        self.__teams: List[Team] = []
+        self.__buzz_state: State = State(self.__teams, self.__bt_comm)
 
         self.__load_config()
 
@@ -75,6 +85,9 @@ class ServeGUI:
 
         test_class = Test(self.__bt_comm)
         self.quart_app.register_blueprint(test_class.blueprint)
+
+        status_class = ApiStatus(self.__bt_comm, self.__teams, self.__buzz_state)
+        self.quart_app.register_blueprint(status_class.blueprint)
 
         config = Config()
         config.bind = self.__bind

@@ -4,4 +4,4 @@
 # https://opensource.org/licenses/MIT
 
 # Number of LEDs on a buzzer
-LED_NB = 20
+LED_NB: int = 20

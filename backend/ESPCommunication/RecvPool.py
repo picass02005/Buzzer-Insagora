@@ -140,7 +140,8 @@ class RecvPool:
 
         return [RecvObject(ts, raw) for ts, raw in c.fetchall()]
 
-    async def wait_for_responses(self, cmd_id: int, cmd: str, timeout: float = 0.5, is_broadcast: bool = False) -> bool:
+    async def wait_for_responses(self, cmd_id: int, cmd: str, timeout: float = 0.75,
+                                 is_broadcast: bool = False) -> bool:
         """Waits for at least one response to a command.
 
         Busy-waits until a matching packet is received or the timeout expires.
@@ -149,7 +150,7 @@ class RecvPool:
         Args:
             cmd_id (int): Command ID of the issued command.
             cmd (str): Command name of the issued command.
-            timeout (float, optional): Maximum time to wait in seconds. Defaults to 0.5.
+            timeout (float, optional): Maximum time to wait in seconds. Defaults to 0.75.
             is_broadcast (bool, optional): If True, waits full timeout even if a response is received.
 
         Returns:
