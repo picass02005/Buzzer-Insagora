@@ -26,13 +26,6 @@ async def main() -> None:
     gui = ServeGUI(bt_comm)
     asyncio.create_task(gui.run())
 
-    await bt_comm.connect_until_complete()
-
-    print(await bt_comm.connected_cache.get_connected_str())
-    print(await bt_comm.connected_cache.get_connected_str())
-    print(await bt_comm.connected_cache.get_connected_str())
-    print(await bt_comm.connected_cache.get_connected_str())
-
     # TODO: Clean CLI / small GUI with flask
 
 
