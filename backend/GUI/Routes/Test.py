@@ -7,7 +7,10 @@ from typing import Tuple
 
 from quart import Blueprint, jsonify, Response
 
+from backend.BuzzerLogic.State import State
+from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
+from backend.ESPCommunication.LEDManager import Color
 
 
 class Test:
@@ -40,6 +43,20 @@ class Test:
 
         self.blueprint.add_url_rule("/", view_func=self.test)
 
+        self.blueprint.add_url_rule("/sidle", view_func=self.state_idle)
+        self.blueprint.add_url_rule("/swait", view_func=self.wait_press)
+        self.blueprint.add_url_rule("/confirm", view_func=self.confirm_press)
+        self.blueprint.add_url_rule("/deny", view_func=self.deny_press)
+
+        self.teams = [Team(primary_color=Color(0, 0, 255), secondary_color=Color(0, 255, 255), bt_comm=self.__bt_comm,
+                           point_limit=5),
+                      Team(primary_color=Color(255, 0, 0), secondary_color=Color(255, 255, 0), bt_comm=self.__bt_comm,
+                           point_limit=5)]
+
+        self.teams[0].associated_buzzers = [b"\x78\x1c\x3c\x2d\x57\x94"]
+        self.teams[1].associated_buzzers = [b"\x6c\xc8\x40\x06\xbe\x2c"]
+        self.state = State(self.teams, self.__bt_comm)
+
     async def test(self) -> Tuple[Response, int]:
         """Handles GET requests to the `/` route.
 
@@ -57,3 +74,22 @@ class Test:
         ret.update({"LED nb": int((await self.__bt_comm.commands.get_led_number(ret["ping"][0]))[0].data[0])})
 
         return jsonify(ret), 200
+
+    async def state_idle(self) -> Tuple[Response, int]:
+        await self.state.set_idle()
+        return jsonify({'state': 'idle'}), 200
+
+    async def wait_press(self) -> Tuple[Response, int]:
+        await self.state.wait_press()
+        return jsonify({'state': 'waiting'}), 200
+
+    async def confirm_press(self) -> Tuple[Response, int]:
+        await self.state.confirm_press()
+        return jsonify({'state': 'confirmed'}), 200
+
+    async def deny_press(self) -> Tuple[Response, int]:
+        await self.state.deny_press()
+        return jsonify({'state': 'denied'}), 200
+
+# TODO: Team selector
+# TODO: proper interface
