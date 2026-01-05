@@ -48,9 +48,9 @@ class Test:
         self.blueprint.add_url_rule("/confirm", view_func=self.confirm_press)
         self.blueprint.add_url_rule("/deny", view_func=self.deny_press)
 
-        self.teams = [Team(primary_color=Color(0, 0, 255), secondary_color=Color(0, 255, 255), bt_comm=self.__bt_comm,
+        self.teams = [Team(name="BLUE", primary_color=Color(0, 0, 255), secondary_color=Color(0, 255, 255), bt_comm=self.__bt_comm,
                            point_limit=5),
-                      Team(primary_color=Color(255, 0, 0), secondary_color=Color(255, 255, 0), bt_comm=self.__bt_comm,
+                      Team(name="RED", primary_color=Color(255, 0, 0), secondary_color=Color(255, 255, 0), bt_comm=self.__bt_comm,
                            point_limit=5)]
 
         self.teams[0].associated_buzzers = [b"\x78\x1c\x3c\x2d\x57\x94"]

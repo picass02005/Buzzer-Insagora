@@ -15,6 +15,7 @@ from quart import Quart
 from backend.BuzzerLogic.State import State
 from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
+from backend.GUI.API.Check import ApiCheck
 from backend.GUI.API.Status import ApiStatus
 from backend.GUI.Routes.Test import Test
 
@@ -88,6 +89,9 @@ class ServeGUI:
 
         status_class = ApiStatus(self.__bt_comm, self.__teams, self.__buzz_state)
         self.quart_app.register_blueprint(status_class.blueprint)
+
+        check_class = ApiCheck(self.__bt_comm, self.__teams, self.__buzz_state)
+        self.quart_app.register_blueprint(check_class.blueprint)
 
         config = Config()
         config.bind = self.__bind
