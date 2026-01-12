@@ -138,6 +138,9 @@ class State:
 
         logger.debug("Switching to WAIT __state")
 
+        logger.debug("Performing automatic clock set")
+        await self.bt_comm.commands.automatic_set_clock()
+
         self.current_state = StateEnum.WAIT
         await self.__set_led_on_state()
 
@@ -207,8 +210,6 @@ class State:
         """
 
         mac_f = self.bt_comm.target_mac_formatter(mac)
-
-        print(f"{mac_f=}")
 
         for i in self.teams:
             if mac_f in i.associated_buzzers:

@@ -54,7 +54,7 @@ class Test:
                            point_limit=5)]
 
         self.teams[0].associated_buzzers = [b"\x78\x1c\x3c\x2d\x57\x94"]
-        self.teams[1].associated_buzzers = [b"\x6c\xc8\x40\x06\xbe\x2c"]
+        self.teams[1].associated_buzzers = [b"\x78\x1c\x3c\x2d\x33\x94"]
         self.state = State(self.teams, self.__bt_comm)
 
     async def test(self) -> Tuple[Response, int]:

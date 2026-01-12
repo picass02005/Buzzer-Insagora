@@ -3,7 +3,7 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 
 from quart import Blueprint, Response, jsonify, request
 
@@ -19,7 +19,6 @@ class ApiStatus:
     endpoints for retrieving information about:
     - Connected Bluetooth devices
     - Current application state
-    - Registered teams and their properties
 
     Attributes:
         __bt_comm (BluetoothCommunication):
@@ -60,7 +59,6 @@ class ApiStatus:
 
         self.blueprint.add_url_rule("/get_connected", view_func=self.get_connected, methods=['GET'])
         self.blueprint.add_url_rule("/get_state", view_func=self.get_state, methods=['GET'])
-        self.blueprint.add_url_rule("/get_teams", view_func=self.get_teams, methods=['GET'])
 
     async def get_connected(self) -> Tuple[Response, int]:
         """Get currently connected Bluetooth devices.
@@ -102,40 +100,3 @@ class ApiStatus:
         """
 
         return jsonify({'state': str(self.__state.current_state).split(".")[1]}), 200
-
-    async def get_teams(self) -> Tuple[Response, int]:
-        """Get all registered teams and their properties.
-
-        Returns:
-            Tuple[Response, int]:
-                A JSON response mapping team names to their details
-                and an HTTP status code.
-
-        Response JSON:
-            {
-                "Team A": {
-                    "name": "Team A",
-                    "point": 10,
-                    "point_limit": 50,
-                    "primary_color": "#FF0000",
-                    "secondary_color": "#FFFFFF",
-                    "associated_buzzers": [
-                        "AA:BB:CC:DD:EE:FF"
-                    ]
-                }
-            }
-        """
-
-        teams: Dict[str, any] = {}
-
-        for i in self.__teams:
-            teams.update({i.name: {
-                'name': i.name,
-                'point': i.point,
-                'point_limit': i.point_limit,
-                'primary_color': i.primary_color.to_str_value(),
-                'secondary_color': i.secondary_color.to_str_value(),
-                'associated_buzzers': [self.__bt_comm.mac_to_str(j) for j in i.associated_buzzers]
-            }})
-
-        return jsonify(teams), 200
