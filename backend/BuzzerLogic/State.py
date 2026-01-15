@@ -123,7 +123,7 @@ class State:
         self.current_state = StateEnum.IDLE
         self.team_check = None
 
-        await self.__set_led_on_state()
+        await self.set_led_on_state()
 
     async def wait_press(self) -> None:
         """Switches the system to WAIT __state and waits for the first button press.
@@ -142,7 +142,7 @@ class State:
         await self.bt_comm.commands.automatic_set_clock()
 
         self.current_state = StateEnum.WAIT
-        await self.__set_led_on_state()
+        await self.set_led_on_state()
 
         recv: RecvObject = await self.bt_comm.but_callback.get_first_press(timeout=None)
 
@@ -157,7 +157,7 @@ class State:
             logger.debug("Switching __state to CHECK")
 
             self.current_state = StateEnum.CHECK
-            await self.__set_led_on_state()
+            await self.set_led_on_state()
 
     async def confirm_press(self) -> None:
         """Confirms the current press and updates the team's score.
@@ -170,7 +170,7 @@ class State:
 
         if self.current_state == StateEnum.WAIT or self.team_check is None:
             self.team_check = None
-            await self.__set_led_on_state()
+            await self.set_led_on_state()
             return
 
         logger.debug(f"Press for {self.team_check.associated_buzzers} confirmed")
@@ -190,7 +190,7 @@ class State:
 
         if self.current_state == StateEnum.WAIT or self.team_check is None:
             self.team_check = None
-            await self.__set_led_on_state()
+            await self.set_led_on_state()
             return
 
         logger.debug(f"Press for {self.team_check.associated_buzzers} denied")
@@ -217,7 +217,7 @@ class State:
 
         return None
 
-    async def __set_led_on_state(self):
+    async def set_led_on_state(self):
         """Updates LEDs to reflect the current system __state.
 
         - IDLE: Updates all __teams’ LEDs to show their current points

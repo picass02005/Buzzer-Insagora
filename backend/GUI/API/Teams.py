@@ -2,6 +2,7 @@
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
+
 import re
 from typing import List, Tuple, Dict, Literal, cast
 
@@ -214,19 +215,19 @@ class ApiTeams:
                 return jsonify({"error": f"Point must be an integer from 0 to point_limit ({team.point_limit})"}), 400
 
         if "primary_color" in payload.keys():
-            try:
+            if self.is_valid_hex_color(payload["primary_color"]):
                 primary = Color().from_hex(payload["primary_color"])
 
-            except AssertionError, ValueError:
+            else:
                 return jsonify({"error": f"Primary color must be a 6 character long hexadecimal number"}), 400
 
             team.primary_color = primary
 
         if "secondary_color" in payload.keys():
-            try:
+            if self.is_valid_hex_color(payload["secondary_color"]):
                 secondary = Color().from_hex(payload["secondary_color"])
 
-            except AssertionError, ValueError:
+            else:
                 return jsonify({"error": f"Secondary color must be a 6 character long hexadecimal number"}), 400
 
             team.secondary_color = secondary
@@ -235,9 +236,5 @@ class ApiTeams:
         self.__teams.append(team)
 
         return jsonify({"status": "ok"}), 200
-
-    # TODO: register buzzer
-
-    # TODO: force LED update
 
     # TODO: docstring
