@@ -39,6 +39,7 @@ class ApiTeams:
         self.blueprint.add_url_rule("/set_point_limit", view_func=self.set_point_limit, methods=['PATCH'])
         self.blueprint.add_url_rule("/reset_points", view_func=self.reset_points, methods=['PATCH'])
         self.blueprint.add_url_rule("/delete", view_func=self.delete_team, methods=['DELETE'])
+        self.blueprint.add_url_rule("/change_name", view_func=self.change_team_name, methods=['PATCH'])
 
     async def get_teams(self) -> Tuple[Response, int]:
         """Get all registered teams and their properties.
@@ -145,6 +146,32 @@ class ApiTeams:
             return jsonify({"error": f"Team {payload["team_name"]} does not exist"}), 400
 
         self.__teams = [i for i in self.__teams if i.name != payload["team_name"]]
+
+        return jsonify({"status": "ok"}), 200
+
+    async def change_team_name(self) -> Tuple[Response, int]:
+        payload = await request.get_json()
+
+        for i in ["old_name", "new_name"]:
+            if i not in payload.keys():
+                return jsonify({"error": f"You must define a field named {i} in the body"}), 400
+
+        team_names = [i.name for i in self.__teams]
+
+        if payload["old_name"] not in team_names:
+            return jsonify({"error": f"Team {payload["old_name"]} does not exist"}), 400
+
+        if payload["new_name"] in team_names:
+            return jsonify({"error": f"Team {payload["new_name"]} already exists"}), 400
+
+        for i in self.__teams.copy():
+            if i.name == payload["old_name"]:
+                i.name = payload["new_name"]
+                self.__teams.append(i)
+
+                break
+
+        self.__teams = [i for i in self.__teams if i.name != payload["old_name"]]
 
         return jsonify({"status": "ok"}), 200
 
