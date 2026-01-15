@@ -134,9 +134,9 @@ class Color:
         assert len(value) == 6, "Hex value must be 6 characters long"
 
         try:
-            red = int(value[0:1], 16)
-            green = int(value[2:3], 16)
-            blue = int(value[4:5], 16)
+            red = int(value[0:2], 16)
+            green = int(value[2:4], 16)
+            blue = int(value[4:6], 16)
 
         except ValueError:
             raise ValueError("A color in hex must be a combinaison of hexadecimals numbers in the format RRGGBB")
