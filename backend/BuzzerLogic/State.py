@@ -118,7 +118,7 @@ class State:
         Resets `team_check` to None.
         """
 
-        logger.debug("Switching to IDLE __state")
+        logger.debug("Switching __state to IDLE")
 
         self.current_state = StateEnum.IDLE
         self.team_check = None
@@ -136,7 +136,7 @@ class State:
             TimeoutError: If no button press is received (depending on callback).
         """
 
-        logger.debug("Switching to WAIT __state")
+        logger.debug("Switching __state to WAIT")
 
         logger.debug("Performing automatic clock set")
         await self.bt_comm.commands.automatic_set_clock()
@@ -154,7 +154,7 @@ class State:
             await self.set_idle()
 
         else:
-            logger.debug("Switching to CHECK __state")
+            logger.debug("Switching __state to CHECK")
 
             self.current_state = StateEnum.CHECK
             await self.__set_led_on_state()

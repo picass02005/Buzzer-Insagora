@@ -2,7 +2,6 @@
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
-
 import re
 from typing import List, Tuple, Dict, Literal, cast
 
@@ -37,8 +36,9 @@ class ApiTeams:
 
         self.blueprint.add_url_rule("/get", view_func=self.get_teams, methods=['GET'])
         self.blueprint.add_url_rule("/make", view_func=self.make_team, methods=['POST'])
-        self.blueprint.add_url_rule("/set_point_limit", view_func=self.set_point_limit, methods=['POST'])
-        self.blueprint.add_url_rule("/reset_points", view_func=self.reset_points, methods=['POST'])
+        self.blueprint.add_url_rule("/set_point_limit", view_func=self.set_point_limit, methods=['PATCH'])
+        self.blueprint.add_url_rule("/reset_points", view_func=self.reset_points, methods=['PATCH'])
+        self.blueprint.add_url_rule("/delete", view_func=self.delete_team, methods=['DELETE'])
 
     async def get_teams(self) -> Tuple[Response, int]:
         """Get all registered teams and their properties.
@@ -131,10 +131,24 @@ class ApiTeams:
         for i in self.__teams:
             i.point = 0
 
+        await self.__bt_comm.commands.clear_leds()
+
+        return jsonify({"status": "ok"}), 200
+
+    async def delete_team(self) -> Tuple[Response, int]:
+        payload = await request.get_json()
+
+        if "team_name" not in payload.keys():
+            return jsonify({"error": f"You must define a field named team_name in the body"}), 400
+
+        if payload["team_name"] not in [i.name for i in self.__teams]:
+            return jsonify({"error": f"Team {payload["team_name"]} does not exist"}), 400
+
+        self.__teams = [i for i in self.__teams if i.name != payload["team_name"]]
+
         return jsonify({"status": "ok"}), 200
 
     # TODO: register buzzer
-    # TODO: remove team
     # TODO: update team
 
     # TODO: docstring
