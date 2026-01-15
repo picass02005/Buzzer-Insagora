@@ -44,6 +44,17 @@ public:
 
         advertise_ble();
 
+        // Clear all buzzers LEDs
+
+        ESPNowMessage res;
+        snprintf(res.data, sizeof(res.data), "CLED");
+
+        memset(&res.target, 0xFF, sizeof(res.target));
+
+        res.cmd_id = 0;
+        res.fwd_ble = 0;
+        esp_now_send_message(&res);
+
         led_bluetooth_disconnect();
     }
 
