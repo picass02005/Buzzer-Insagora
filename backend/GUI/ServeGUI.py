@@ -16,6 +16,7 @@ from backend.BuzzerLogic.State import State
 from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.GUI.API.Check import ApiCheck
+from backend.GUI.API.Light import ApiLights
 from backend.GUI.API.Status import ApiStatus
 from backend.GUI.API.Teams import ApiTeams
 from backend.GUI.Routes.Test import Test
@@ -96,6 +97,9 @@ class ServeGUI:
 
         teams_class = ApiTeams(self.__bt_comm, self.__teams, self.__buzz_state)
         self.quart_app.register_blueprint(teams_class.blueprint)
+
+        lights_class = ApiLights(self.__bt_comm, self.__teams, self.__buzz_state)
+        self.quart_app.register_blueprint(lights_class.blueprint)
 
         config = Config()
         config.bind = self.__bind
