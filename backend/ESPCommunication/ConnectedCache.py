@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectedCache:
-    def __init__(self, bt_comm: BluetoothCommunication, expires_after: int = 10) -> None:
+    def __init__(self, bt_comm: BluetoothCommunication, expires_after: int = 30) -> None:
         self.bt_comm: BluetoothCommunication = bt_comm
         self.expires_after: int = expires_after
 

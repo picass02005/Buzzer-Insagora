@@ -40,6 +40,7 @@ class ApiTeams:
         self.blueprint.add_url_rule("/reset_points", view_func=self.reset_points, methods=['PATCH'])
         self.blueprint.add_url_rule("/delete", view_func=self.delete_team, methods=['DELETE'])
         self.blueprint.add_url_rule("/change_name", view_func=self.change_team_name, methods=['PATCH'])
+        self.blueprint.add_url_rule("/update", view_func=self.update_team, methods=['PATCH'])
 
     async def get_teams(self) -> Tuple[Response, int]:
         """Get all registered teams and their properties.
@@ -175,7 +176,68 @@ class ApiTeams:
 
         return jsonify({"status": "ok"}), 200
 
+    async def update_team(self) -> Tuple[Response, int]:
+        payload = await request.get_json()
+
+        if "team_name" not in payload.keys():
+            return jsonify({"error": f"You must define a field named team_name in the body"}), 400
+
+        team: Team | None = None
+
+        for i in self.__teams:
+            if payload["team_name"] == i.name:
+                team = i
+                break
+
+        if team is None:
+            return jsonify({"error": f"Team {payload["team_name"]} does not exist"}), 400
+
+        if "associated_buzzers" in payload.keys():
+            await self.__bt_comm.connected_cache.update_cache(force=False)
+            connected = await self.__bt_comm.connected_cache.get_connected_str()
+
+            for i in payload["associated_buzzers"]:
+                for j in self.__teams:
+                    if j.name != payload["team_name"] and i in j.associated_buzzers:
+                        return jsonify({"error": f"Buzzer {i} is already associated to team {j.name}"}), 400
+
+                    if i not in connected:
+                        return jsonify({"error": f"Buzzer {i} is not connected"}), 400
+
+            team.associated_buzzers = payload["associated_buzzers"]
+
+        if "point" in payload.keys():
+            if isinstance(payload["point"], int) and 0 <= payload["point"] <= team.point_limit:
+                team.point = payload["point"]
+
+            else:
+                return jsonify({"error": f"Point must be an integer from 0 to point_limit ({team.point_limit})"}), 400
+
+        if "primary_color" in payload.keys():
+            try:
+                primary = Color().from_hex(payload["primary_color"])
+
+            except AssertionError, ValueError:
+                return jsonify({"error": f"Primary color must be a 6 character long hexadecimal number"}), 400
+
+            team.primary_color = primary
+
+        if "secondary_color" in payload.keys():
+            try:
+                secondary = Color().from_hex(payload["secondary_color"])
+
+            except AssertionError, ValueError:
+                return jsonify({"error": f"Secondary color must be a 6 character long hexadecimal number"}), 400
+
+            team.secondary_color = secondary
+
+        self.__teams = [i for i in self.__teams if i.name != payload["team_name"]]
+        self.__teams.append(team)
+
+        return jsonify({"status": "ok"}), 200
+
     # TODO: register buzzer
-    # TODO: update team
+
+    # TODO: force LED update
 
     # TODO: docstring
