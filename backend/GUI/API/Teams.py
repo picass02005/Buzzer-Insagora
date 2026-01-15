@@ -82,9 +82,42 @@ class ApiTeams:
 
     @staticmethod
     def is_valid_hex_color(value: str) -> bool:
+        """Validate whether a string represents a valid hexadecimal RGB color.
+
+        The color may optionally start with a leading '#' and must contain
+        exactly six hexadecimal characters.
+
+        Args:
+            value (str):
+                The string to validate.
+
+        Returns:
+            bool:
+                True if the string is a valid hex color, False otherwise.
+        """
+
         return bool(HEX_COLOR_RE.match(value))
 
     async def make_team(self) -> Tuple[Response, int]:
+        """Create and register a new team.
+
+        Expects a JSON payload containing a team name and color definitions.
+        The point limit is inherited from existing teams, or defaults to 8
+        if no teams exist.
+
+        Returns:
+            Tuple[Response, int]:
+                A JSON response indicating success or failure, and an HTTP
+                status code.
+
+        Request JSON:
+            {
+                "team_name": "Team A",
+                "primary_color": "#FF0000",
+                "secondary_color": "#FFFFFF"
+            }
+        """
+
         payload = await request.get_json()
 
         for i in ["team_name", "primary_color", "secondary_color"]:
@@ -115,6 +148,21 @@ class ApiTeams:
         return jsonify({"status": "ok"}), 200
 
     async def set_point_limit(self):
+        """Set the point limit for all registered teams.
+
+        The provided limit must be one of the predefined valid values.
+
+        Returns:
+            Tuple[Response, int]:
+                A JSON response indicating success or failure, and an HTTP
+                status code.
+
+        Request JSON:
+            {
+                "limit": 8
+            }
+        """
+
         payload = await request.get_json()
 
         if "limit" not in payload.keys():
@@ -131,6 +179,16 @@ class ApiTeams:
         return jsonify({"status": "ok"}), 200
 
     async def reset_points(self):
+        """Reset the points of all teams and clear all buzzer LEDs.
+
+        This sets each team's point value back to zero and sends a command
+        to clear LEDs on all connected devices.
+
+        Returns:
+            Tuple[Response, int]:
+                A JSON response indicating success, and an HTTP status code.
+        """
+
         for i in self.__teams:
             i.point = 0
 
@@ -139,6 +197,19 @@ class ApiTeams:
         return jsonify({"status": "ok"}), 200
 
     async def delete_team(self) -> Tuple[Response, int]:
+        """Delete an existing team by name.
+
+        Returns:
+            Tuple[Response, int]:
+                A JSON response indicating success or failure, and an HTTP
+                status code.
+
+        Request JSON:
+            {
+                "team_name": "Team A"
+            }
+        """
+
         payload = await request.get_json()
 
         if "team_name" not in payload.keys():
@@ -152,6 +223,22 @@ class ApiTeams:
         return jsonify({"status": "ok"}), 200
 
     async def change_team_name(self) -> Tuple[Response, int]:
+        """Rename an existing team.
+
+        The new name must not already be in use by another team.
+
+        Returns:
+            Tuple[Response, int]:
+                A JSON response indicating success or failure, and an HTTP
+                status code.
+
+        Request JSON:
+            {
+                "old_name": "Team A",
+                "new_name": "Team Alpha"
+            }
+        """
+
         payload = await request.get_json()
 
         for i in ["old_name", "new_name"]:
@@ -178,6 +265,29 @@ class ApiTeams:
         return jsonify({"status": "ok"}), 200
 
     async def update_team(self) -> Tuple[Response, int]:
+        """Update properties of an existing team.
+
+        Supports updating associated buzzers, points, and colors. Buzzer
+        associations are validated to ensure devices are connected and not
+        already assigned to another team.
+
+        Returns:
+            Tuple[Response, int]:
+                A JSON response indicating success or failure, and an HTTP
+                status code.
+
+        Request JSON (example):
+            {
+                "team_name": "Team A",
+                "point": 5,
+                "primary_color": "#00FF00",
+                "secondary_color": "#0000FF",
+                "associated_buzzers": [
+                    "AA:BB:CC:DD:EE:FF"
+                ]
+            }
+        """
+
         payload = await request.get_json()
 
         if "team_name" not in payload.keys():
@@ -236,5 +346,3 @@ class ApiTeams:
         self.__teams.append(team)
 
         return jsonify({"status": "ok"}), 200
-
-    # TODO: docstring
