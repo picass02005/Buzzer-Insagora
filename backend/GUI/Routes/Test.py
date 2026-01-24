@@ -53,8 +53,8 @@ class Test:
                       Team(name="RED", primary_color=Color(255, 0, 0), secondary_color=Color(255, 255, 0), bt_comm=self.__bt_comm,
                            point_limit=5)]
 
-        self.teams[0].associated_buzzers = [b"\x78\x1c\x3c\x2d\x57\x94"]
-        self.teams[1].associated_buzzers = [b"\x78\x1c\x3c\x2d\x33\x94"]
+        self.teams[1].associated_buzzers = [b"\x78\x1c\x3c\x2d\x57\x94"]
+        self.teams[0].associated_buzzers = [b"\x78\x1c\x3c\x2d\x33\x94", b"\x6C\xC8\x40\x06\xBE\x2C"]
         self.state = State(self.teams, self.__bt_comm)
 
     async def test(self) -> Tuple[Response, int]:
@@ -92,4 +92,5 @@ class Test:
         return jsonify({'__state': 'denied'}), 200
 
 # TODO: Team selector
+# TODO: ~~register buzzer~~ Identify buzzer => update_team
 # TODO: proper interface
