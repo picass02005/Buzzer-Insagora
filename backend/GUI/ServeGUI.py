@@ -16,10 +16,10 @@ from backend.BuzzerLogic.State import State
 from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.GUI.API.Check import ApiCheck
+from backend.GUI.API.Flow import ApiFlow
 from backend.GUI.API.Light import ApiLights
 from backend.GUI.API.Status import ApiStatus
 from backend.GUI.API.Teams import ApiTeams
-from backend.GUI.Routes.Test import Test
 
 logger = logging.getLogger(__name__)
 
@@ -86,9 +86,6 @@ class ServeGUI:
         - Starts the Quart app asynchronously using Hypercorn.
         """
 
-        test_class = Test(self.__bt_comm)
-        self.quart_app.register_blueprint(test_class.blueprint)
-
         status_class = ApiStatus(self.__bt_comm, self.__teams, self.__buzz_state)
         self.quart_app.register_blueprint(status_class.blueprint)
 
@@ -100,6 +97,9 @@ class ServeGUI:
 
         lights_class = ApiLights(self.__bt_comm, self.__teams, self.__buzz_state)
         self.quart_app.register_blueprint(lights_class.blueprint)
+
+        flow_class = ApiFlow(self.__bt_comm, self.__teams, self.__buzz_state)
+        self.quart_app.register_blueprint(flow_class.blueprint)
 
         config = Config()
         config.bind = self.__bind

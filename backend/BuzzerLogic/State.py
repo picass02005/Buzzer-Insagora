@@ -212,7 +212,8 @@ class State:
         mac_f = self.bt_comm.target_mac_formatter(mac)
 
         for i in self.teams:
-            if mac_f in i.associated_buzzers:
+            associated = [self.bt_comm.target_mac_formatter(j) for j in i.associated_buzzers]
+            if mac_f in associated:
                 return i
 
         return None
