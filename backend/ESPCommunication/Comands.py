@@ -37,6 +37,9 @@ class Commands:
             List[RecvObject]: List of responses from the buzzer(s).
         """
 
+        if self.bt_comm.client is None:
+            return []
+
         cmd_id = await self.bt_comm.send_command(command=b"PING", target_mac=target_mac)
 
         await self.bt_comm.recv_pool.wait_for_responses(
