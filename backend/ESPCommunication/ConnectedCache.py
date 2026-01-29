@@ -30,7 +30,11 @@ class ConnectedCache:
 
         logging.debug("Updating connected cache")
 
-        ret: List[RecvObject] = await self.bt_comm.commands.ping(target_mac=b"\xFF\xFF\xFF\xFF\xFF\xFF")
+        if self.bt_comm.client is None:
+            ret: List[RecvObject] = []
+
+        else:
+            ret: List[RecvObject] = await self.bt_comm.commands.ping(target_mac=b"\xFF\xFF\xFF\xFF\xFF\xFF")
 
         self.__connected = [i.data[0] for i in ret]
         self.next_poll = int(time.time() + self.expires_after)

@@ -272,7 +272,396 @@ You then need to add it in `commands_handler` (`commands_handler.h`).
 
 ### Backend
 
-> [!TOOD]
+The backend is defined in 2 different stack:
+
+- Communication stack
+- API stack
+
+Communication stack is responsible for the BLE communication between the PC and master buzzer.
+You can find it under `./backend/ESPCommunication`.
+
+API stack is a layer for communicating with BLE stack. It also implements teams, LED management and flow control.
+You can find it under `./GUI/API`.
+
+Every function have a full docstring you can refer to for more informations.
+
+### API
+
+All API calls are defined under `http://your_hostname/api`.
+
+#### /api/status/get_connected [GET]
+
+Return a JSON containing connected buzzers MAC address.
+By default, it uses a cache value (if valid) to reduce ping.
+You can force to repopulate cache by using `/api/status/get_connected?no_cache=true`.
+
+No parameters are set in body.
+
+Example response:
+
+```JSON
+{
+    "connected": [
+        "AA:AA:AA:AA:AA:AA",
+        "BB:BB:BB:BB:BB:BB"
+    ]
+}
+```
+
+#### /api/status/get_state [GET]
+
+Return the current flow state of the buzzers.
+
+Valid states are:
+
+- `IDLE`: The buzzer system is waiting for an operation. Its LED show current team points.
+- `WAIT`: The buzzer system is waiting for a button press. Its LED are set to white.<br>
+  When a press is registered, next state is `CHECK`.
+- `CHECK`: The buzzer system is waiting for a confirmation or a denial from the game master. When waiting for
+  confirmation, LEDs are green and red.<br>
+  When answer is confirmed, a quick animation shows and state is set to `IDLE`.
+
+No parameters are set in body.
+
+Example response:
+
+```JSON
+{
+    "state": "IDLE"
+}
+```
+
+#### /api/flow/wait_press [POST]
+
+Executes the following:
+
+1. Reset master buzzer clock
+2. Auto-synchronize all buzzers clock (`ACLK`)
+3. Change game state to `WAIT` (+ change LED accordingly)
+4. Wait for a button press event
+5. Wait a few millisecond and detect the first press (regarding clock)
+6. Change game state to `CHECK` (+ change LED accordingly)
+
+No parameters are set in body.
+
+This method return a partial file for each game state changes.
+
+When going to `WAIT` state:
+
+```JSON
+{
+    "state": "waiting for press"
+}
+```
+
+When going to `CHECK` state:
+
+```JSON
+{
+    "state": "waiting for confirmation"
+}
+```
+
+#### /api/flow/confirm [POST]
+
+This method must be called when in `CHECK` state to confirm a participant answer.
+
+This makes the LED blink briefly in green and add a point to this buzzer's team.
+After this method, game state go into `IDLE`.
+
+No parameters are set in body.
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/flow/deny [POST]
+
+This method must be called when in `CHECK` state to not confirm a participant answer.
+
+This makes the LED blink briefly in red.
+After this method, game state go into `IDLE`.
+
+No parameters are set in body.
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/teams/get [GET]
+
+This method is used to get all teams information.
+
+No parameters are set in body.
+
+An example return is like this:
+
+```JSON
+{
+    "test_1": {
+        "associated_buzzers": [
+            "AA:AA:AA:AA:AA:AA"
+        ],
+        "name": "test_1",
+        "point": 0,
+        "point_limit": 8,
+        "primary_color": "FF0000",
+        "secondary_color": "FFFF00"
+    },
+    "test_2": {
+        "associated_buzzers": [
+            "BB:BB:BB:BB:BB:BB"
+        ],
+        "name": "test_2",
+        "point": 0,
+        "point_limit": 8,
+        "primary_color": "0000FF",
+        "secondary_color": "8000FF"
+    }
+}
+```
+
+#### /api/teams/make [POST]
+
+This method is used to make a new team.
+
+Your call must have the following body fields:
+
+```JSON
+{
+    "team_name": "test_1",
+    "primary_color": "#ff0000",
+    "secondary_color": "#ffff00"
+}
+```
+
+Primary color refers to the color of the team.
+Secondary color is used to display points when limit is greater than 8.
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/teams/delete [DELETE]
+
+This method deletes a team.
+
+Your call must have the following body fields:
+
+```JSON
+{
+    "team_name": "test_1"
+}
+```
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/teams/set_point_limit [PATCH]
+
+This method set a new point limit for all teams.
+
+After calling this method, you should reset point number.
+
+Your call must have the following body fields:
+
+```JSON
+{
+    "limit": 10
+}
+```
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/teams/reset_points [PATCH]
+
+This method reset all teams point to 0. After that, it reset LED display to default.
+
+No parameters are set in body.
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/teams/change_name [PATCH]
+
+This method is used to change a team name.
+
+Your call must have the following body fields:
+
+```JSON
+{
+    "old_name": "test_1",
+    "new_name": "t_1"
+}
+```
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/teams/update [PATCH]
+
+This method is used to update a team attributes.
+
+Your call must define at least this body fields:
+
+```JSON
+{
+    "team_name": "test_1"
+}
+```
+
+You can add optional fields to modify this team attributes.
+
+- `"associated_buzzers": ["AA:AA:AA:AA:AA:AA"]`: A list of all associated buzzers MAC addressù
+- `"point": 0`: Set point number to the given value
+- `"primary_color": "0000FF"`: Set the team primary color
+- `"secondary_color": "00FF00"`: Set the secondary color
+
+If you change `associated_buzzers`, backend will check that your buzzers are currently connected.
+
+Example body:
+
+```JSON
+{
+    "team_name": "test_1",
+    "associated_buzzers": [
+        "AA:AA:AA:AA:AA:AA"
+    ],
+    "point": 0,
+    "primary_color": "0000FF",
+    "secondary_color": "00FF00"
+}
+```
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/lights/reset_led_default [PUT]
+
+This method reset all buzzers LED to default value.
+
+If status is `IDLE`, default value is the number of points lit up with team color.
+
+If status is `WAIT`, default value is all LED in white.
+
+If status is `CHECK`, default value is all buzzers off except the first one to have pressed the buzzer. Its LED are red
+and green.
+
+No parameters are set in body.
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/lights/clear_leds [PUT]
+
+This method set all buzzers LED to an off state.
+
+No parameters are set in body.
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
+
+#### /api/lights/get_led_nb [GET]
+
+This method is used to get the number of onboard LED for every buzzers.
+
+No parameters are set in body.
+
+An example return is like this:
+
+```JSON
+{
+    "number": 16
+}
+```
+
+#### /api/lights/set_led_color [PUT]
+
+This method is used to set LED color on a given buzzer, or every buzzer.
+
+If no target MAC address is given, it defaults to broadcast address (`FF:FF:FF:FF:FF:FF`)
+
+Example body:
+
+```JSON
+{
+    "target_mac": "ff:ff:ff:ff:ff:ff",
+    "colors": [
+        "FF0000",
+        "FFFF00",
+        "00FF00",
+        "00FFFF",
+        "0000FF",
+        "FF0000",
+        "FFFF00",
+        "00FF00",
+        "00FFFF",
+        "0000FF",
+        "FF0000",
+        "FFFF00",
+        "00FF00",
+        "00FFFF",
+        "0000FF",
+        "FF0000"
+    ]
+}
+```
+
+This returns a JSON containing status / error like this:
+
+```JSON
+{
+    "status": "ok"
+}
+```
 
 ### Frontend
 

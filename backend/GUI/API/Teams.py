@@ -192,7 +192,7 @@ class ApiTeams:
         for i in self.__teams:
             i.point = 0
 
-        await self.__bt_comm.commands.clear_leds()
+        await self.__state.set_led_on_state()
 
         return jsonify({"status": "ok"}), 200
 
