@@ -94,8 +94,7 @@
                 <label>Team Name</label>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="team-name-input" required placeholder="Team Name">
-                    <button type="button" id="random-name-btn" class="btn secondary"
-                            title="Generate Random Name">🎲
+                    <button type="button" id="random-name-btn" class="btn secondary" title="Generate Random Name">🎲
                     </button>
                 </div>
             </div>
@@ -127,7 +126,12 @@
             </div>
             <!-- Buzzers will be handled differently - maybe a multiselect or just text for now as per API -->
             <div class="form-group">
-                <label>Associated Buzzers (Select to Add)</label>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label>Associated Buzzers</label>
+                    <button type="button" id="refresh-buzzers-btn" class="btn secondary btn-xs"
+                            title="Refresh Buzzers">🔄 Refresh
+                    </button>
+                </div>
                 <div id="available-buzzers-list" class="buzzers-list">
                     <!-- Checkboxes for buzzers -->
                 </div>

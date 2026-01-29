@@ -101,6 +101,25 @@ function initGlobalListeners() {
         winnerDismissedForPoints = pointLimit; // Or simply TRUE for current state
         closeWinModal();
     });
+
+    document.getElementById('refresh-buzzers-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('refresh-buzzers-btn');
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Refreshing...";
+
+        await fetchConnectedBuzzers(true);
+
+        // We need to know which buzzers were ALREADY assigned to the current team in the modal
+        // to keep them checked.
+        const currentSelected = Array.from(document.querySelectorAll('input[name="associated_buzzers"]:checked'))
+            .map(cb => cb.value);
+
+        renderBuzzerList(currentSelected);
+
+        btn.disabled = false;
+        btn.textContent = originalText;
+    });
 }
 
 // Quick Colors
@@ -295,9 +314,6 @@ async function openTeamModal(teamToEdit = null) {
     teamModal.classList.remove('hidden');
     await fetchConnectedBuzzers(true);
 
-    const container = availableBuzzersList;
-    container.innerHTML = '';
-
     let assignedBuzzers = [];
     if (teamToEdit) {
         document.getElementById('modal-title').textContent = 'Edit Team';
@@ -333,6 +349,13 @@ async function openTeamModal(teamToEdit = null) {
 
     document.getElementById('primary-color-code').textContent = primaryColorInput.value;
     document.getElementById('secondary-color-code').textContent = secondaryColorInput.value;
+
+    renderBuzzerList(assignedBuzzers, teamToEdit);
+}
+
+function renderBuzzerList(assignedBuzzers, teamToEdit = null) {
+    const container = availableBuzzersList;
+    container.innerHTML = '';
 
     const allAssigned = new Set();
     Object.values(teamsData).forEach(t => {

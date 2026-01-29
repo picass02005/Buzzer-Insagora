@@ -270,6 +270,11 @@ input:focus {
     border: 1px solid var(--border);
 }
 
+.btn-xs {
+    padding: 2px 8px;
+    font-size: 0.75rem;
+}
+
 .hidden {
     display: none !important;
 }
