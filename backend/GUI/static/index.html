@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buzzer Insagora</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap"
+            rel="stylesheet">
+</head>
+
+<body>
+<div class="app-container">
+    <!-- Navigation -->
+    <nav class="sidebar">
+        <div class="logo">
+            <h1>Buzzer<br><span>Insagora</span></h1>
+        </div>
+        <ul class="nav-links">
+            <li class="active" data-tab="configuration">
+                <span class="icon">⚙️</span> Configuration
+            </li>
+            <li data-tab="quiz">
+                <span class="icon">🎮</span> Quiz
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content-area">
+
+        <!-- Configuration View -->
+        <section id="configuration-view" class="view active">
+            <header class="view-header">
+                <h2>Configuration</h2>
+                <div class="global-actions">
+                    <select id="point-limit-select">
+                        <option value="5">Limit: 5 Pts</option>
+                        <option value="8">Limit: 8 Pts</option>
+                        <option value="10">Limit: 10 Pts</option>
+                        <option value="16">Limit: 16 Pts</option>
+                    </select>
+                    <button id="reset-all-points-btn" class="btn warning">Reset All Points</button>
+                    <button id="add-team-btn" class="btn primary">+ Add Team</button>
+                </div>
+            </header>
+
+            <div class="teams-grid" id="teams-container">
+                <!-- Teams will be injected here via JS -->
+            </div>
+        </section>
+
+        <!-- Quiz View -->
+        <section id="quiz-view" class="view">
+            <header class="view-header">
+                <h2>Quiz Dashboard</h2>
+                <div class="game-status_indicator">
+                    Status: <span id="game-state-badge" class="badge">IDLE</span>
+                </div>
+            </header>
+
+            <div class="quiz-controls">
+                <button id="start-question-btn" class="btn success large-btn">Start Question</button>
+                <div id="check-controls" class="hidden">
+                    <p class="instruction-text">Answer received from <span id="answering-team">...</span></p>
+                    <div class="button-group">
+                        <button id="confirm-btn" class="btn success">Confirm (Correct)</button>
+                        <button id="deny-btn" class="btn danger">Deny (Wrong)</button>
+                    </div>
+                </div>
+                <div id="wait-controls" class="hidden">
+                    <p class="instruction-text pulse">Waiting for buzz...</p>
+                </div>
+            </div>
+
+            <div class="scoreboard" id="scoreboard-container">
+                <!-- Scores will be injected here via JS -->
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modals -->
+<div id="team-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title">Add Team</h3>
+        <form id="team-form">
+            <input type="hidden" id="edit-team-original-name">
+            <div class="form-group">
+                <label>Team Name</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="team-name-input" required placeholder="Team Name">
+                    <button type="button" id="random-name-btn" class="btn secondary"
+                            title="Generate Random Name">🎲
+                    </button>
+                </div>
+            </div>
+            <div class="form-group" id="points-group">
+                <label>Points</label>
+                <input type="number" id="team-points-input" value="0" min="0">
+            </div>
+            <div class="form-group">
+                <label>Color Theme</label>
+                <div id="color-presets" style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <!-- JS injected presets -->
+                </div>
+                <div style="display: flex; gap: 20px;">
+                    <div>
+                        <label style="font-size: 0.8rem; margin-bottom: 2px;">Primary</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="primary-color-input" value="#ff0000">
+                            <span class="color-code" id="primary-color-code">#ff0000</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; margin-bottom: 2px;">Secondary</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="secondary-color-input" value="#ffff00">
+                            <span class="color-code" id="secondary-color-code">#ffff00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Buzzers will be handled differently - maybe a multiselect or just text for now as per API -->
+            <div class="form-group">
+                <label>Associated Buzzers (Select to Add)</label>
+                <div id="available-buzzers-list" class="buzzers-list">
+                    <!-- Checkboxes for buzzers -->
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn secondary" id="cancel-team-btn">Cancel</button>
+                <button type="submit" class="btn primary">Save Team</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="win-modal" class="modal hidden">
+    <div class="modal-content win-content">
+        <div class="trophy-icon">🏆</div>
+        <h3>We have a Winner!</h3>
+        <h1 id="winner-name-display">Team Name</h1>
+        <p>reached the point limit!</p>
+        <button id="reset-game-btn" class="btn primary">New Game</button>
+        <button id="dismiss-win-btn" class="btn secondary">Dismiss</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+
+</html>

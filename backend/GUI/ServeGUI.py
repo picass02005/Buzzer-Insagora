@@ -8,6 +8,7 @@ import logging
 import pathlib
 from typing import List
 
+import quart
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from quart import Quart
@@ -85,6 +86,15 @@ class ServeGUI:
         - Configures the Hypercorn server with the bind addresses from configuration.
         - Starts the Quart app asynchronously using Hypercorn.
         """
+
+        static_bp = quart.Blueprint(
+            "static",
+            __name__,
+            static_folder="static",
+            static_url_path="/"
+        )
+
+        self.quart_app.register_blueprint(static_bp)
 
         status_class = ApiStatus(self.__bt_comm, self.__teams, self.__buzz_state)
         self.quart_app.register_blueprint(status_class.blueprint)
