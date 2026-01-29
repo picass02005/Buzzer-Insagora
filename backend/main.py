@@ -5,6 +5,7 @@
 
 
 import asyncio
+import contextlib
 import logging
 
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
@@ -24,14 +25,20 @@ async def main() -> None:
     bt_comm = BluetoothCommunication()
 
     gui = ServeGUI(bt_comm)
-    asyncio.create_task(gui.run())
 
-    await bt_comm.connect_until_complete()
+    ble_task = asyncio.create_task(bt_comm.connect_until_complete())
+
+    try:
+        await gui.run()
+
+    finally:
+        ble_task.cancel()
+
+        with contextlib.suppress(asyncio.CancelledError):
+            await ble_task
 
     # TODO: Clean CLI / small GUI with flask
 
 
 if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    asyncio.run(main())

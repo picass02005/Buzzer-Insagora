@@ -103,7 +103,8 @@ class ServeGUI:
 
         config = Config()
         config.bind = self.__bind
-        config.shutdown_timeout = 1
-        config.install_signal_handlers = False
+        config.shutdown_timeout = 10
+
+        logger.info(f"Serving backend on {' '.join([f"http://{i}" for i in self.__bind])}")
 
         await serve(self.quart_app, config)
