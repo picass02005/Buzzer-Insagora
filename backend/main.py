@@ -12,7 +12,7 @@ from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunicati
 from backend.GUI.ServeGUI import ServeGUI
 
 logging.basicConfig(
-    level=logging.DEBUG,  # TODO: Set to INFO for prod
+    level=logging.INFO,
 )
 
 

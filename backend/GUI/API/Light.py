@@ -143,7 +143,7 @@ class ApiLights:
 
         payload = await request.get_json()
 
-        if "target_mac" not in payload.keys():
+        if payload is None or "target_mac" not in payload.keys():
             mac = b"\xFF\xFF\xFF\xFF\xFF\xFF"
 
         else:

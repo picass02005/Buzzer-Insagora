@@ -6,6 +6,7 @@
 import json
 import logging
 import pathlib
+import webbrowser
 from typing import List
 
 import quart
@@ -114,6 +115,9 @@ class ServeGUI:
         config = Config()
         config.bind = self.__bind
         config.shutdown_timeout = 10
+
+        logger.info(f"Opening url http://{self.__bind[0]}/index.html")
+        webbrowser.open_new(f"http://{self.__bind[0]}/index.html")
 
         logger.info(f"Serving backend on {' '.join([f"http://{i}" for i in self.__bind])}")
 

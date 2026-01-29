@@ -599,7 +599,13 @@ This returns a JSON containing status / error like this:
 
 This method set all buzzers LED to an off state.
 
-No parameters are set in body.
+Your call must have the following body fields:
+
+```JSON
+{
+  "target_mac": "AA:AA:AA:AA:AA:AA"
+}
+```
 
 This returns a JSON containing status / error like this:
 
