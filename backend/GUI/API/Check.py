@@ -3,13 +3,12 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-from typing import List, Tuple, Dict, Any
+from typing import Tuple, Dict, Any
 
 from quart import Blueprint, Response, jsonify
 
 from backend.BuzzerLogic.Constants import LED_NB
 from backend.BuzzerLogic.State import State
-from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 
 
@@ -26,11 +25,6 @@ class ApiCheck:
             Bluetooth communication handler used to send commands to
             connected buzzers and retrieve their configuration.
 
-        __teams (List[Team]):
-            List of teams currently registered in the system.
-            This attribute is stored for consistency with other API
-            classes, even if not directly used by this class.
-
         __state (State):
             Global application state container.
             This attribute is stored for consistency with other API
@@ -41,21 +35,18 @@ class ApiCheck:
             All routes are prefixed with ``/api/check``.
     """
 
-    def __init__(self, bt_comm: BluetoothCommunication, teams: List[Team], state: State):
+    def __init__(self, bt_comm: BluetoothCommunication, state: State):
         """Initialize the check API and register routes.
 
         Args:
             bt_comm (BluetoothCommunication):
                 Bluetooth communication handler used to communicate
                 with connected buzzers.
-            teams (List[Team]):
-                List of teams currently registered in the system.
             state (State):
                 Global application state container.
         """
 
         self.__bt_comm: BluetoothCommunication = bt_comm
-        self.__teams: List[Team] = teams
         self.__state: State = state
 
         self.blueprint = Blueprint("api_check", __name__, url_prefix="/api/check")

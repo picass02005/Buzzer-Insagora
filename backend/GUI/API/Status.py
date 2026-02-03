@@ -3,12 +3,11 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-from typing import List, Tuple
+from typing import Tuple
 
 from quart import Blueprint, Response, jsonify, request
 
 from backend.BuzzerLogic.State import State
-from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 
 
@@ -25,34 +24,25 @@ class ApiStatus:
             Bluetooth communication handler used to query connected devices
             and manage the connection cache.
 
-        __teams (List[Team]):
-            List of teams currently registered in the system. Each team
-            contains scoring information, color configuration, and
-            associated buzzer MAC addresses.
-
         __state (State):
             Global application state container representing the current
             state of the application.
-
         blueprint (Blueprint):
             Quart Blueprint exposing status-related API endpoints.
             All routes are prefixed with ``/api/status``.
     """
 
-    def __init__(self, bt_comm: BluetoothCommunication, teams: List[Team], state: State):
+    def __init__(self, bt_comm: BluetoothCommunication, state: State):
         """Initialize the status API and register routes.
 
         Args:
             bt_comm (BluetoothCommunication):
                 Bluetooth communication handler used to query connected devices.
-            teams (List[Team]):
-                List of teams currently registered in the system.
             state (State):
                 Global application state container.
         """
 
         self.__bt_comm: BluetoothCommunication = bt_comm
-        self.__teams: List[Team] = teams
         self.__state: State = state
 
         self.blueprint = Blueprint("api_status", __name__, url_prefix="/api/status")

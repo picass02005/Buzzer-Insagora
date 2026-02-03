@@ -37,8 +37,6 @@ async def main() -> None:
         with contextlib.suppress(asyncio.CancelledError):
             await ble_task
 
-    # TODO: Clean CLI / small GUI with flask
-
 
 if __name__ == "__main__":
     asyncio.run(main())

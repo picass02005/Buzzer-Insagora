@@ -3,13 +3,12 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 import re
-from typing import List, Tuple
+from typing import Tuple
 
 from quart import Blueprint, Response, jsonify, request
 
 from backend.BuzzerLogic.Constants import LED_NB
 from backend.BuzzerLogic.State import State
-from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.ESPCommunication.LEDManager import Color, LEDs
 
@@ -17,20 +16,17 @@ HEX_COLOR_RE = re.compile(r"^#?[0-9a-fA-F]{6}$")
 
 
 class ApiLights:
-    def __init__(self, bt_comm: BluetoothCommunication, teams: List[Team], state: State):
+    def __init__(self, bt_comm: BluetoothCommunication, state: State):
         """Initialize the lights API and register routes.
 
         Args:
             bt_comm (BluetoothCommunication):
                 Bluetooth communication handler used to query connected devices.
-            teams (List[Team]):
-                List of teams currently registered in the system.
             state (State):
                 Global application state container.
         """
 
         self.__bt_comm: BluetoothCommunication = bt_comm
-        self.__teams: List[Team] = teams
         self.__state: State = state
 
         self.blueprint = Blueprint("api_lights", __name__, url_prefix="/api/lights")

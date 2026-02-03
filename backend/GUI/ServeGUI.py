@@ -53,10 +53,8 @@ class ServeGUI:
         self.quart_app: Quart = Quart(__name__)
 
         self.__bt_comm: BluetoothCommunication = bt_comm
+        self.__state: State = State(self.__bt_comm)
         self.__bind: List[str] = []
-
-        self.__teams: List[Team] = []
-        self.__buzz_state: State = State(self.__teams, self.__bt_comm)
 
         self.__load_config()
 
@@ -97,19 +95,19 @@ class ServeGUI:
 
         self.quart_app.register_blueprint(static_bp)
 
-        status_class = ApiStatus(self.__bt_comm, self.__teams, self.__buzz_state)
+        status_class = ApiStatus(self.__bt_comm, self.__state)
         self.quart_app.register_blueprint(status_class.blueprint)
 
-        check_class = ApiCheck(self.__bt_comm, self.__teams, self.__buzz_state)
+        check_class = ApiCheck(self.__bt_comm, self.__state)
         self.quart_app.register_blueprint(check_class.blueprint)
 
-        teams_class = ApiTeams(self.__bt_comm, self.__teams, self.__buzz_state)
+        teams_class = ApiTeams(self.__bt_comm, self.__state)
         self.quart_app.register_blueprint(teams_class.blueprint)
 
-        lights_class = ApiLights(self.__bt_comm, self.__teams, self.__buzz_state)
+        lights_class = ApiLights(self.__bt_comm, self.__state)
         self.quart_app.register_blueprint(lights_class.blueprint)
 
-        flow_class = ApiFlow(self.__bt_comm, self.__teams, self.__buzz_state)
+        flow_class = ApiFlow(self.__bt_comm, self.__state)
         self.quart_app.register_blueprint(flow_class.blueprint)
 
         config = Config()

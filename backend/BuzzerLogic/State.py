@@ -6,13 +6,16 @@
 import asyncio
 import logging
 from enum import Enum
-from typing import List
+from typing import TYPE_CHECKING
 
 from backend.BuzzerLogic.Constants import LED_NB
 from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.ESPCommunication.LEDManager import LEDs, Color
 from backend.ESPCommunication.RecvPool import RecvObject
+
+if TYPE_CHECKING:
+    from backend.GUI.globals import BtComm, TeamsList
 
 logger = logging.getLogger(__name__)
 
@@ -26,23 +29,20 @@ class State:
         - Detection and confirmation/denial of button presses from __teams
 
     Attributes:
-        teams (List[Team]): List of Team instances participating in the game.
         bt_comm (BluetoothCommunication): Bluetooth communication interface
             for interacting with team buzzers.
         current_state (StateEnum): Current __state of the system.
         team_check (Optional[Team]): The team currently being checked for a press.
     """
 
-    def __init__(self, teams: List[Team], bt_comm: BluetoothCommunication) -> None:
+    def __init__(self, bt_comm: BluetoothCommunication) -> None:
         """Initializes the State instance.
 
         Args:
-            teams (List[Team]): List of Team instances participating in the game.
             bt_comm (BluetoothCommunication): Bluetooth communication interface
                 used to control LEDs and read button presses.
         """
 
-        self.teams: List[Team] = teams
         self.bt_comm: BluetoothCommunication = bt_comm
 
         self.current_state: StateEnum = StateEnum.IDLE
@@ -209,9 +209,9 @@ class State:
             or None if no team matches.
         """
 
-        mac_f = self.bt_comm.target_mac_formatter(mac)
+        mac_f = BtComm.target_mac_formatter(mac)
 
-        for i in self.teams:
+        for i in TeamsList:
             associated = [self.bt_comm.target_mac_formatter(j) for j in i.associated_buzzers]
             if mac_f in associated:
                 return i
@@ -221,7 +221,7 @@ class State:
     async def set_led_on_state(self):
         """Updates LEDs to reflect the current system __state.
 
-        - IDLE: Updates all __teams’ LEDs to show their current points
+        - IDLE: Updates all TeamsList LEDs to show their current points
         - WAIT: Lights all LEDs white to indicate waiting for a press
         - CHECK: Lights LEDs for the team currently being checked
         - Other states: Clears all LEDs
@@ -229,7 +229,7 @@ class State:
 
         match self.current_state:
             case StateEnum.IDLE:
-                for t in self.teams:
+                for t in TeamsList:
                     await t.set_led_point()
 
             case StateEnum.WAIT:
