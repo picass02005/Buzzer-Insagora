@@ -8,11 +8,11 @@ from typing import Tuple, Dict, Literal, cast
 
 from quart import Blueprint, Response, jsonify, request
 
+import backend.GUI.global_var
 from backend.BuzzerLogic.State import State
 from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.ESPCommunication.LEDManager import Color
-from backend.GUI.globals import TeamsList
 
 HEX_COLOR_RE = re.compile(r"^#?[0-9a-fA-F]{6}$")
 
@@ -66,7 +66,7 @@ class ApiTeams:
 
         teams: Dict[str, any] = {}
 
-        for i in TeamsList:
+        for i in backend.GUI.global_var.TeamsList:
             teams.update({i.name: {
                 'name': i.name,
                 'point': i.point,
@@ -126,22 +126,22 @@ class ApiTeams:
             if not self.is_valid_hex_color(payload[i]):
                 return jsonify({"error": f"{i} must be given in #RRGGBB form"}), 400
 
-        if payload["team_name"] in [i.name for i in self.__teams]:
+        if payload["team_name"] in [i.name for i in backend.GUI.global_var.TeamsList]:
             return jsonify({"error": f"Team {payload["team_name"]} already exists"}), 400
 
         team_name: str = str(payload["team_name"])
         primary_color: Color = Color().from_hex(payload["primary_color"].lstrip("#"))
         secondary_color: Color = Color().from_hex(payload["secondary_color"].lstrip("#"))
 
-        if len(self.__teams) == 0:
+        if len(backend.GUI.global_var.TeamsList) == 0:
             point_limit: Literal[5, 8, 10, 16] = 8
 
         else:
-            point_limit: Literal[5, 8, 10, 16] = self.__teams[0].point_limit
+            point_limit: Literal[5, 8, 10, 16] = backend.GUI.global_var.TeamsList[0].point_limit
 
         team = Team(name=team_name, primary_color=primary_color, secondary_color=secondary_color,
                     bt_comm=self.__bt_comm, point_limit=point_limit)
-        self.__teams.append(team)
+        backend.GUI.global_var.TeamsList.append(team)
 
         return jsonify({"status": "ok"}), 200
 
@@ -171,7 +171,7 @@ class ApiTeams:
 
         limit: Literal[5, 8, 10, 16] = cast(Literal[5, 8, 10, 16], payload["limit"])
 
-        for i in self.__teams:
+        for i in backend.GUI.global_var.TeamsList:
             i.point_limit = limit
 
         return jsonify({"status": "ok"}), 200
@@ -187,7 +187,7 @@ class ApiTeams:
                 A JSON response indicating success, and an HTTP status code.
         """
 
-        for i in self.__teams:
+        for i in backend.GUI.global_var.TeamsList:
             i.point = 0
 
         await self.__state.set_led_on_state()
@@ -213,10 +213,11 @@ class ApiTeams:
         if "team_name" not in payload.keys():
             return jsonify({"error": f"You must define a field named team_name in the body"}), 400
 
-        if payload["team_name"] not in [i.name for i in self.__teams]:
+        if payload["team_name"] not in [i.name for i in backend.GUI.global_var.TeamsList]:
             return jsonify({"error": f"Team {payload["team_name"]} does not exist"}), 400
 
-        self.__teams = [i for i in self.__teams if i.name != payload["team_name"]]
+        backend.GUI.global_var.TeamsList = [i for i in backend.GUI.global_var.TeamsList
+                                            if i.name != payload["team_name"]]
 
         return jsonify({"status": "ok"}), 200
 
@@ -243,7 +244,7 @@ class ApiTeams:
             if i not in payload.keys():
                 return jsonify({"error": f"You must define a field named {i} in the body"}), 400
 
-        team_names = [i.name for i in self.__teams]
+        team_names = [i.name for i in backend.GUI.global_var.TeamsList]
 
         if payload["old_name"] not in team_names:
             return jsonify({"error": f"Team {payload["old_name"]} does not exist"}), 400
@@ -251,14 +252,15 @@ class ApiTeams:
         if payload["new_name"] in team_names:
             return jsonify({"error": f"Team {payload["new_name"]} already exists"}), 400
 
-        for i in self.__teams.copy():
+        for i in backend.GUI.global_var.TeamsList.copy():
             if i.name == payload["old_name"]:
                 i.name = payload["new_name"]
-                self.__teams.append(i)
+                backend.GUI.global_var.TeamsList.append(i)
 
                 break
 
-        self.__teams = [i for i in self.__teams if i.name != payload["old_name"]]
+        backend.GUI.global_var.TeamsList = [i for i in backend.GUI.global_var.TeamsList
+                                            if i.name != payload["old_name"]]
 
         return jsonify({"status": "ok"}), 200
 
@@ -293,7 +295,7 @@ class ApiTeams:
 
         team: Team | None = None
 
-        for i in self.__teams:
+        for i in backend.GUI.global_var.TeamsList:
             if payload["team_name"] == i.name:
                 team = i
                 break
@@ -306,7 +308,7 @@ class ApiTeams:
             connected = await self.__bt_comm.connected_cache.get_connected_str()
 
             for i in payload["associated_buzzers"]:
-                for j in self.__teams:
+                for j in backend.GUI.global_var.TeamsList:
                     if j.name != payload["team_name"] and i in j.associated_buzzers:
                         return jsonify({"error": f"Buzzer {i} is already associated to team {j.name}"}), 400
 
@@ -340,7 +342,8 @@ class ApiTeams:
 
             team.secondary_color = secondary
 
-        self.__teams = [i for i in self.__teams if i.name != payload["team_name"]]
-        self.__teams.append(team)
+        backend.GUI.global_var.TeamsList = [i for i in backend.GUI.global_var.TeamsList
+                                            if i.name != payload["team_name"]]
+        backend.GUI.global_var.TeamsList.append(team)
 
         return jsonify({"status": "ok"}), 200

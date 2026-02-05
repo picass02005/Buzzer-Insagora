@@ -6,16 +6,13 @@
 import asyncio
 import logging
 from enum import Enum
-from typing import TYPE_CHECKING
 
+import backend.GUI.global_var
 from backend.BuzzerLogic.Constants import LED_NB
 from backend.BuzzerLogic.Team import Team
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.ESPCommunication.LEDManager import LEDs, Color
 from backend.ESPCommunication.RecvPool import RecvObject
-
-if TYPE_CHECKING:
-    from backend.GUI.globals import BtComm, TeamsList
 
 logger = logging.getLogger(__name__)
 
@@ -209,9 +206,9 @@ class State:
             or None if no team matches.
         """
 
-        mac_f = BtComm.target_mac_formatter(mac)
+        mac_f = self.bt_comm.target_mac_formatter(mac)
 
-        for i in TeamsList:
+        for i in backend.GUI.global_var.TeamsList:
             associated = [self.bt_comm.target_mac_formatter(j) for j in i.associated_buzzers]
             if mac_f in associated:
                 return i
@@ -229,7 +226,7 @@ class State:
 
         match self.current_state:
             case StateEnum.IDLE:
-                for t in TeamsList:
+                for t in backend.GUI.global_var.TeamsList:
                     await t.set_led_point()
 
             case StateEnum.WAIT:
