@@ -23,8 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller
           pip install -r requirements.txt
+          pip install pyinstaller
 
       - name: Build Windows EXE
         run: |
@@ -51,10 +51,11 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pyinstaller
 
       - name: Build Linux binary
         run: |
-          python -m PyInstaller backend/main.py \
+          python -m pyinstaller backend/main.py \
             --name Buzzer-Insagora \
             --onefile \
             --collect-submodules backend \
