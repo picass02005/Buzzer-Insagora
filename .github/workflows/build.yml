@@ -54,7 +54,7 @@ jobs:
 
       - name: Build Linux binary
         run: |
-          pyinstaller backend/main.py \
+          python -m PyInstaller backend/main.py \
             --name Buzzer-Insagora \
             --onefile \
             --collect-submodules backend \
