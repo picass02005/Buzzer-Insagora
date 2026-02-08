@@ -13,7 +13,87 @@ Main developper: Clément Duran <[clementduran0@gmail.com](mailto:clementduran0@
 
 # Manual
 
-> [!TOOD]
+## Software installation
+
+### From pre-compiled code
+
+A GitHub action is set up to compile the code on every push on `master`.
+
+To download it:
+
+1. Go to [actions](https://github.com/picass02005/Buzzer-Insagora/actions) tab
+2. Select the last run
+3. You can download an executable from artifacts (one for Windows, one for Linux)
+
+> [!NOTE] Antivirus
+> For an unknown reason, on Windows, sometimes Windows defender will block the execution.
+> You can force it on the popup that will appear.
+
+### From source code
+
+#### Clone this project
+
+To clone this project, you can use the following :
+
+```bash
+git clone https://github.com/picass02005/Buzzer-Insagora.git
+```
+
+#### Create a virtualenv (recommended)
+
+To execute this code cleanly, I recommend you to create a virtualenv.
+You can do this by running the following command on this project root (where this README is located):
+
+```bash
+python3 -m venv .venv
+```
+
+Then you need to load your venv environment:
+
+```bash
+# On linux
+source .venv/bin/activate
+
+# On windows
+.venv\Scripts\activate.bat
+```
+
+#### Install depedencies
+
+To install depedencies, you must run the following:
+
+```bash
+python3 -m pip -r requirements.txt
+```
+
+#### Run the program
+
+Finally, you can run the program (you need to be at the root of this project):
+
+```bash
+python3 backend/main.py
+```
+
+#### Compile from sources
+
+If you want to compile your own binaries, you need to install [PyInstaller](https://pyinstaller.org/en/stable/):
+
+```bash
+# This may depends on your operating system, please refer to PyInstaller documentation
+python3 -m pip install pyinstaller
+```
+
+You can now compile your binary using:
+
+```bass
+make exe_win    # You must be on Windows to run this
+make exe_linux  # You must be on linux to run this
+```
+
+The executable will be in `./dist`.
+
+If needed, you have serveral tools in this project `Makefile` that you can use to compile or upload the onboard code for
+ESP32 boards. Those tools uses `arduino-cli` and were tested on Linux. You can also upload it using Arduino IDE.
 
 # Technical specifications
 
@@ -22,6 +102,7 @@ Main developper: Clément Duran <[clementduran0@gmail.com](mailto:clementduran0@
 > [!TOOD]
 
 ## Software
+
 ### Communication diagram
 
 ```mermaid
@@ -73,17 +154,19 @@ All packets through the ESP-NOW network are currently sent to broadcast address 
 Each of them is a `ESPNowMessage`.
 
 Structure of `ESPNowMessage`:
+
 - `char fwd_ble`: Represent if the message should be forwarded through BLE network when it reaches the gateway.<br>
-To forward it, set its value to `1`, else set it to `0`.
+  To forward it, set its value to `1`, else set it to `0`.
 - `char target[6]`: Contain the target ESP MAC address for this packet.<br>
-Set it to `{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}` for a broadcast message.<br>
-For this purpose, you can use the `broadcastAddress` constant.
+  Set it to `{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}` for a broadcast message.<br>
+  For this purpose, you can use the `broadcastAddress` constant.
 - `char data[240]`: The raw data of this packet.<br>
-If you're sending a command and its data, separate them with a space.
+  If you're sending a command and its data, separate them with a space.
 
 ### Example communication
 
-In the following example, we suppose we have a generic `PING` command where respond is in the form `PONG [destination MAC address]`.
+In the following example, we suppose we have a generic `PING` command where respond is in the form
+`PONG [destination MAC address]`.
 
 #### Example 1: direct command to gateway
 
@@ -150,8 +233,8 @@ sequenceDiagram
     end
 ```
 
-
 ### Commands
+
 #### Ping
 
 Command used to ping any ESP.
@@ -236,13 +319,15 @@ packet
 ```
 
 For the next example, there is a quick reminder from extended ASCII codes:
+
 ```
 ASCII -> DEC | HEX
 !     -> 33  | 0x21
 ÿ     -> 255 | 0xff
 ```
 
-In this example, I have a buzzer with 3 LED, and I want to set them to `0xFF2121`, `0x21FF21` and `0x2121FF`. This translate into `ÿ!!`, `!ÿ!` and `!!ÿ`.
+In this example, I have a buzzer with 3 LED, and I want to set them to `0xFF2121`, `0x21FF21` and `0x2121FF`. This
+translate into `ÿ!!`, `!ÿ!` and `!!ÿ`.
 
 > Command: `SLED ÿ!!!ÿ!!!ÿ`
 
@@ -257,7 +342,8 @@ This command does not send any response.
 
 #### Which callback to use for communication?
 
-For every communication (from master buzzer or other buzzers), send messages using `esp_now_send_message` (defined in `esp-now.h`).
+For every communication (from master buzzer or other buzzers), send messages using `esp_now_send_message` (defined in
+`esp-now.h`).
 
 #### How to add a command?
 
@@ -603,7 +689,7 @@ Your call must have the following body fields:
 
 ```JSON
 {
-  "target_mac": "AA:AA:AA:AA:AA:AA"
+    "target_mac": "AA:AA:AA:AA:AA:AA"
 }
 ```
 
@@ -671,11 +757,12 @@ This returns a JSON containing status / error like this:
 
 ### Frontend
 
-> [!TOOD]
+The frontend was vibe-coded using [Antigravity](https://antigravity.google/) with [Gemini](https://gemini.google.com/)
+model.
+
+One side project could be to code it properly, but by lack of time, I could not do it for now.
 
 # License
-
-> [!TOOD] Add header in every file
 
 This project is distribued under the MIT license.
 For more information: https://opensource.org/licenses/MIT

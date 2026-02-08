@@ -1,4 +1,11 @@
 /**
+ * Code generated using Google Gemini
+ *
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
+/**
  * Buzzer Insagora Database & Logic
  */
 

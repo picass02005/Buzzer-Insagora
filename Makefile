@@ -59,5 +59,3 @@ exe_linux:
 	  --collect-all bleak \
 	  --add-data "backend/GUI/static:backend/GUI/static" \
 	  --add-data "backend/backend-config.json:backend"
-
-
