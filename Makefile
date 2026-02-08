@@ -38,4 +38,26 @@ print:
 
 clean:
 	rm -rf build
+	rm -rf dist
+	rm Buzzer-Insagora.spec
+
+exe_win:
+    pyinstaller backend\main.py `
+		--name Buzzer-Insagora `
+		--onefile `
+		--collect-submodules backend `
+		--collect-all bleak `
+		--hidden-import bleak.backends.winrt.client `
+		--add-data "backend\GUI\static;backend\GUI\static" `
+		--add-data "backend\backend-config.json;backend"
+
+exe_linux:
+	pyinstaller backend/main.py \
+	  --name Buzzer-Insagora \
+	  --onefile \
+	  --collect-submodules backend \
+	  --collect-all bleak \
+	  --add-data "backend/GUI/static:backend/GUI/static" \
+	  --add-data "backend/backend-config.json:backend"
+
 

@@ -3,3 +3,5 @@ build
 .vscode
 .idea
 **/__pycache__
+Buzzer-Insagora.spec
+dist
