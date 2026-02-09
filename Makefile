@@ -42,7 +42,7 @@ clean:
 	rm Buzzer-Insagora.spec
 
 exe_win:
-    pyinstaller backend\main.py `
+	pyinstaller backend/main.py `
 		--name Buzzer-Insagora `
 		--onefile `
 		--collect-submodules backend `
@@ -53,9 +53,9 @@ exe_win:
 
 exe_linux:
 	pyinstaller backend/main.py \
-	  --name Buzzer-Insagora \
-	  --onefile \
-	  --collect-submodules backend \
-	  --collect-all bleak \
-	  --add-data "backend/GUI/static:backend/GUI/static" \
-	  --add-data "backend/backend-config.json:backend"
+		--name Buzzer-Insagora \
+		--onefile \
+		--collect-submodules backend \
+		--collect-all bleak \
+		--add-data "backend/GUI/static:backend/GUI/static" \
+		--add-data "backend/backend-config.json:backend"
