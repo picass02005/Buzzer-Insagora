@@ -166,10 +166,10 @@ class ApiTeams:
         if "limit" not in payload.keys():
             return jsonify({"error": f"You must define a field named limit in the body"}), 400
 
-        if payload["limit"] not in [5, 8, 10, 16]:
-            return jsonify({"error": f"Valid limits are 5, 8, 10 or 16"}), 400
+        if payload["limit"] not in [5, 8, 10, 16, -1]:
+            return jsonify({"error": f"Valid limits are 5, 8, 10, 16 or -1 (infinite)"}), 400
 
-        limit: Literal[5, 8, 10, 16] = cast(Literal[5, 8, 10, 16], payload["limit"])
+        limit: Literal[5, 8, 10, 16, -1] = cast(Literal[5, 8, 10, 16, -1], payload["limit"])
 
         for i in backend.GUI.global_var.TeamsList:
             i.point_limit = limit
@@ -318,11 +318,13 @@ class ApiTeams:
             team.associated_buzzers = payload["associated_buzzers"]
 
         if "point" in payload.keys():
-            if isinstance(payload["point"], int) and 0 <= payload["point"] <= team.point_limit:
-                team.point = payload["point"]
-
+            if isinstance(payload["point"], int) and payload["point"] >= 0:
+                if team.point_limit == -1 or payload["point"] <= team.point_limit:
+                    team.point = payload["point"]
+                else:
+                    return jsonify({"error": f"Point must be <= point_limit ({team.point_limit})"}), 400
             else:
-                return jsonify({"error": f"Point must be an integer from 0 to point_limit ({team.point_limit})"}), 400
+                return jsonify({"error": "Point must be a non-negative integer"}), 400
 
         if "primary_color" in payload.keys():
             if self.is_valid_hex_color(payload["primary_color"]):

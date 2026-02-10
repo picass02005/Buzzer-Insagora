@@ -9,7 +9,7 @@ from backend.BuzzerLogic.Constants import LED_NB
 from backend.ESPCommunication.BluetoothCommunication import BluetoothCommunication
 from backend.ESPCommunication.LEDManager import Color, LEDs
 
-T_point_lim = Literal[5, 8, 10, 16]
+T_point_lim = Literal[5, 8, 10, 16, -1]
 
 
 class Team:
@@ -26,8 +26,9 @@ class Team:
             score ranges.
         bt_comm (BluetoothCommunication): Bluetooth communication interface
             used to send LED commands to ESP devices.
-        point_limit (Literal[5, 8, 10, 16]): Maximum number of points for
+        point_limit (Literal[5, 8, 10, 16, -1]): Maximum number of points for
             the team.
+            If set to -1, points are infinite.
         point (int): Current score of the team.
         associated_buzzers (List[bytes]): List of MAC addresses identifying
             buzzers associated with this team.
@@ -44,7 +45,7 @@ class Team:
                 score ranges.
             bt_comm (BluetoothCommunication): Bluetooth communication interface
                 used to send LED commands.
-            point_limit (Literal[5, 8, 10, 16]): Maximum number of points for
+            point_limit (Literal[5, 8, 10, 16, -1]): Maximum number of points for
                 the team.
         """
 
@@ -70,7 +71,10 @@ class Team:
             pattern for one circular score module.
         """
 
-        if self.point_limit == 5 or (self.point_limit == 10 and self.point <= 5):
+        if self.point_limit == -1:
+            return [self.primary_color for _ in range(LED_NB)]
+
+        elif self.point_limit == 5 or (self.point_limit == 10 and self.point <= 5):
             return [self.primary_color if i else Color(0, 0, 0) for i in self.__calc_led_point_5(self.point)]
 
         elif self.point_limit == 8 or (self.point_limit == 16 and self.point <= 8):

@@ -636,6 +636,9 @@ function renderScoreboard() {
 }
 
 function checkForWinner() {
+    // Disable winner modal if point limit is infinite
+    if (pointLimit === -1) return;
+
     // If we deliberately dismissed the winner for this point threshold, skip
     if (winnerDismissedForPoints !== -1 && winnerDismissedForPoints === pointLimit) {
         // We only skip if the points are STILL the same?
