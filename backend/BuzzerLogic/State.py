@@ -99,15 +99,15 @@ class State:
 
         await self.bt_comm.commands.clear_leds()
 
-        for i in range(5):
+        for i in range(2):
             for mac in self.team_check.associated_buzzers:
                 await self.bt_comm.commands.set_leds(l, mac)
 
-            await asyncio.sleep(0.25)
+            await asyncio.sleep(0.15)
 
             await self.bt_comm.commands.clear_leds()
 
-            await asyncio.sleep(0.25)
+            await asyncio.sleep(0.15)
 
     async def set_idle(self) -> None:
         """Switches the system to the IDLE __state and updates LEDs.
