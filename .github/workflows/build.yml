@@ -42,15 +42,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install deps
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libssl-dev libffi-dev build-essential
+          sudo apt-get install -y \
+            build-essential \
+            libssl-dev \
+            libffi-dev \
+            zlib1g-dev \
+            wget \
+            libbz2-dev \
+            libreadline-dev \
+            libsqlite3-dev \
+            xz-utils \
+            tk-dev \
+            uuid-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libgdbm-dev \
+            liblzma-dev
+
+      - name: Download Python 3.14 source
+        run: |
+          wget https://www.python.org/ftp/python/3.14.0/Python-3.14.0.tgz
+          tar -xf Python-3.14.0.tgz
+
+      - name: Build and install Python
+        run: |
+          cd Python-3.14.0
+          ./configure --enable-optimizations --with-ensurepip=install
+          make -j$(nproc)
+          sudo make altinstall
+          python3.14 --version
+
+      - name: Install python deps
+        run: |
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
