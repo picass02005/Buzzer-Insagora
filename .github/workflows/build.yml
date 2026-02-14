@@ -49,8 +49,6 @@ jobs:
 
       - name: Install deps
         run: |
-          sudo apt update
-          sudo apt install -y libssl3
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
@@ -63,7 +61,9 @@ jobs:
             --collect-submodules backend \
             --collect-all bleak \
             --add-data "backend/GUI/static:backend/GUI/static" \
-            --add-data "backend/backend-config.json:backend"
+            --add-data "backend/backend-config.json:backend" \
+            --exclude-binary libssl.so.3 \
+            --exclude-binary libcrypto.so.3
 
       - name: Upload Linux binary
         uses: actions/upload-artifact@v4
