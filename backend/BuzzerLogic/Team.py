@@ -72,7 +72,7 @@ class Team:
         """
 
         if self.point_limit == -1:
-            return [self.primary_color for _ in range(LED_NB)]
+            return [self.primary_color for _ in range(8)]
 
         elif self.point_limit == 5 or (self.point_limit == 10 and self.point <= 5):
             return [self.primary_color if i else Color(0, 0, 0) for i in self.__calc_led_point_5(self.point)]
