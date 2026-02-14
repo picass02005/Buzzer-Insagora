@@ -62,8 +62,6 @@ jobs:
             --collect-all bleak \
             --add-data "backend/GUI/static:backend/GUI/static" \
             --add-data "backend/backend-config.json:backend" \
-            --exclude-binary libssl.so.3 \
-            --exclude-binary libcrypto.so.3 \
             --exclude-module _ssl
 
       - name: Upload Linux binary
