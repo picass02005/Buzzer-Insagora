@@ -99,7 +99,19 @@ ESP32 boards. Those tools uses `arduino-cli` and were tested on Linux. You can a
 
 ## Hardware
 
-> [!TOOD]
+### Electronic
+
+All files related to PCB conceptions can be found under [CAO/PCB](./CAO/PCB).
+
+You can ask GEI for custom PCB. You need to give them the files under [pdf_mask](./CAO/PCB/pdf_mask/).
+
+If needed, the kicad project can be found under [kicad_project](./CAO/PCB/kicad_project/).
+
+### Casing
+
+The casing was made using onshape. Its project can be found under [this link](https://cad.onshape.com/documents/d32b5483efb85fc275e8530b/w/3e110ba059403e44c50f27c8/e/61eb53e4b49d77882c064105?renderMode=0&uiState=69906051c49d80537d0f6ebd).
+
+You can find all STL files necessary to 3D print it under [3D-model-str](./CAO/3D-model-stl/).
 
 ## Software
 
@@ -766,3 +778,4 @@ One side project could be to code it properly, but by lack of time, I could not 
 
 This project is distribued under the MIT license.
 For more information: https://opensource.org/licenses/MIT
+
